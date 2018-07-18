@@ -36,7 +36,32 @@ new Vue({
       return this.matches.sort(compare);
     },
     playerStats: function() {
+      Array.from(this.users).forEach(function(user) {
+        user.wins = 0;
+/*        for (var match in this.matches) {
+          for (var matchUser in match.players) {
+            if (matchUser.id == user.id && matchUser.is_winner) {
+              user.win += 1;
+            }
+          }
+        }*/
+      });
 
+      //for (var user in this.users) {
+/*        if (!this.users.hasOwnProperty(user)) {
+          continue;
+        }
+        user.wins = 0;
+        for (var match in this.matches) {
+          for (var matchUser in match.players) {
+            if (matchUser.id == user.id && matchUser.is_winner) {
+              user.win += 1;
+            }
+          }
+        }*/
+//      }
+
+      return this.users;
     }
   },
   created() {

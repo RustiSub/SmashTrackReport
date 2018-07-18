@@ -23,10 +23,12 @@
     <table>
         <tr>
             <td>Player</td>
+            <td>Wins</td>
         </tr>
-        <template v-for="user in users">
+        <template v-for="user in playerStats">
             <tr>
-                <td>{{ user }}</td>
+                <td>{{ user.tag }}</td>
+                <td>{{ user.wins }}</td>
             </tr>
         </template>
     </table>
