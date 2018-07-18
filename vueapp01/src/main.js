@@ -20,7 +20,24 @@ Vue.filter('formatDate', function(value) {
 new Vue({
   el: '#app',
   data: {
-    matches: []
+    matches: [],
+    users: [],
+  },
+  computed: {
+    sortedMatchesByDate: function() {
+      function compare(a, b) {
+        if (moment(a.match.date).isBefore(moment(b.match.date)))
+          return 1;
+        if (moment(a.match.date).isAfter(moment(b.match.date)))
+          return -1;
+        return 0;
+      }
+
+      return this.matches.sort(compare);
+    },
+    playerStats: function() {
+
+    }
   },
   created() {
     let self = this;
@@ -34,6 +51,17 @@ new Vue({
       },
       withCredentials: true
     }).then((response) => {
+      axios.get('https://smashtrack.benn0.be/users', {
+        headers: {
+          'Content-type': 'application/json',
+        },
+        withCredentials: true
+      }).then(usersResponse => {
+        self.users = usersResponse.data.data;
+
+        return self.users;
+      });
+
       axios.get('https://smashtrack.benn0.be/matches', {
         headers: {
           'Content-type': 'application/json',
