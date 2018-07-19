@@ -16,6 +16,56 @@ Vue.filter('formatDate', function(value) {
   }
 });
 
+let calculatePlayerStats = function(matches, users) {
+  Array.from(users).forEach(function(user) {
+    user.games = 0;
+    user.wins = 0;
+    user.losses = 0;
+    user.winRatio = 0;
+    user.stocksTaken = 0;
+    user.stocksTakenRatio = 0;
+    user.stocksLost = 0;
+    user.stocksLostRatio = 0;
+
+    user.matchesPlayed = [];
+
+    Array.from(matches).forEach(function(matchData) {
+      Array.from(matchData.players).forEach(function(player) {
+        if (player.user.id === user.id) {
+          user.matchesPlayed.push(matchData);
+        }
+      });
+    });
+
+    Array.from(user.matchesPlayed).forEach(function(matchPlayedData) {
+      Array.from(matchPlayedData.players).forEach(function(player) {
+        if (player.user.id === user.id) {
+          if (player.is_winner) {
+            user.wins += 1;
+          } else {
+            user.losses += 1;
+          }
+
+          user.games += 1;
+
+          user.stocksLost += matchPlayedData.match.stocks - player.data.stocks;
+        } else {
+          user.stocksTaken += matchPlayedData.match.stocks - player.data.stocks;
+        }
+      });
+    });
+
+    if (!user.games) {
+      return;
+    }
+    user.winRatio = (user.wins / user.games).toFixed(3);
+    user.stocksTakenRatio = (user.stocksTaken / user.games).toFixed(3);
+    user.stocksLostRatio = (user.stocksLost / user.games).toFixed(3);
+  });
+
+  return users;
+};
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
@@ -34,34 +84,6 @@ new Vue({
       }
 
       return this.matches.sort(compare);
-    },
-    playerStats: function() {
-      Array.from(this.users).forEach(function(user) {
-        user.wins = 0;
-/*        for (var match in this.matches) {
-          for (var matchUser in match.players) {
-            if (matchUser.id == user.id && matchUser.is_winner) {
-              user.win += 1;
-            }
-          }
-        }*/
-      });
-
-      //for (var user in this.users) {
-/*        if (!this.users.hasOwnProperty(user)) {
-          continue;
-        }
-        user.wins = 0;
-        for (var match in this.matches) {
-          for (var matchUser in match.players) {
-            if (matchUser.id == user.id && matchUser.is_winner) {
-              user.win += 1;
-            }
-          }
-        }*/
-//      }
-
-      return this.users;
     }
   },
   created() {
@@ -94,6 +116,8 @@ new Vue({
         withCredentials: true
       }).then(matchesResponse => {
         self.matches = matchesResponse.data.data;
+
+        self.users = calculatePlayerStats(self.matches, self.users);
 
         return self.matches;
       });

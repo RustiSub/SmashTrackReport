@@ -23,12 +23,30 @@
     <table>
         <tr>
             <td>Player</td>
+            <td></td>
+            <td>Games</td>
             <td>Wins</td>
+            <td>Losses</td>
+            <td>Win %</td>
+            <td></td>
+            <td>Stocks Lost</td>
+            <td>Avg Stocks Lost</td>
+            <td>Stocks Taken</td>
+            <td>Avg Stocks Taken</td>
         </tr>
-        <template v-for="user in playerStats">
+        <template v-for="user in users">
             <tr>
                 <td>{{ user.tag }}</td>
+                <td></td>
+                <td>{{ user.games }}</td>
                 <td>{{ user.wins }}</td>
+                <td>{{ user.losses }}</td>
+                <td>{{ user.winRatio }}</td>
+                <td></td>
+                <td>{{ user.stocksLost }}</td>
+                <td>{{ user.stocksLostRatio }}</td>
+                <td>{{ user.stocksTaken }}</td>
+                <td>{{ user.stocksTakenRatio }}</td>
             </tr>
         </template>
     </table>
