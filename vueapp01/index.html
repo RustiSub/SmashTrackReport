@@ -55,11 +55,11 @@
                     <td>{{ character.games }}</td>
                     <td>{{ character.wins }}</td>
                     <td>{{ character.losses }}</td>
-                    <td>{{ character.winRatio }}</td>
+                    <td>{{ ratio(character.wins, character.games) }}</td>
                     <td>{{ character.stocksLost }}</td>
-                    <td>{{ character.stocksLostRatio }}</td>
+                    <td>{{ ratio(character.stocksLost, character.games) }}</td>
                     <td>{{ character.stocksTaken }}</td>
-                    <td>{{ character.stocksTakenRatio }}</td>
+                    <td>{{ ratio(character.stocksTaken, character.games) }}</td>
                 </tr>
             </template>
         </template>

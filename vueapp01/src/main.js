@@ -33,8 +33,6 @@ let calculatePlayerStats = function(self) {
     user.matchesPlayed = [];
     user.characters = {};
 
-    user.charactersVisible = true;
-
     Array.from(matches).forEach(function(matchData) {
       Array.from(matchData.players).forEach(function(player) {
         if (player.user.id === user.id) {
@@ -59,10 +57,12 @@ let calculatePlayerStats = function(self) {
     });
 
     Array.from(user.matchesPlayed).forEach(function(matchPlayedData) {
+      let character;
+      matchPlayedData.stocksTaken = 0;
       Array.from(matchPlayedData.players).forEach(function(player) {
-        let character = user.characters[player.character.name];
-
         if (player.user.id === user.id) {
+          character = user.characters[player.character.name];
+
           if (player.is_winner) {
             user.wins += 1;
             character.wins += 1;
@@ -78,8 +78,11 @@ let calculatePlayerStats = function(self) {
           character.stocksLost += matchPlayedData.match.stocks - player.data.stocks;
         } else {
           user.stocksTaken += matchPlayedData.match.stocks - player.data.stocks;
+
+          matchPlayedData.stocksTaken += matchPlayedData.match.stocks - player.data.stocks;
         }
       });
+      character.stocksTaken += matchPlayedData.stocksTaken;
     });
 
     if (!user.games) {
@@ -105,7 +108,10 @@ new Vue({
   methods: {
     toggleCharacters() {
       this.showCharacters = !this.showCharacters;
-    }
+    },
+    ratio: function(number, total) {
+      return (number / total).toFixed(3);
+    },
   },
   computed: {
     sortedMatchesByDate: function() {
