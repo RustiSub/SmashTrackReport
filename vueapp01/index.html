@@ -20,29 +20,27 @@
     <h1>Smacker</h1>
     <h2>KickAss Logo</h2>
     <h3>Leaderboard</h3>
-    <table>
-        <tr>
-            <td>Player</td>
-            <td></td>
-            <td>Games</td>
-            <td>Wins</td>
-            <td>Losses</td>
-            <td>Win %</td>
-            <td></td>
-            <td>Stocks Lost</td>
-            <td>Avg Stocks Lost</td>
-            <td>Stocks Taken</td>
-            <td>Avg Stocks Taken</td>
-        </tr>
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Player</th>
+                <th>Games</th>
+                <th>Wins</th>
+                <th>Losses</th>
+                <th>Win %</th>
+                <th>Stocks Lost</th>
+                <th>Avg Stocks Lost</th>
+                <th>Stocks Taken</th>
+                <th>Avg Stocks Taken</th>
+            </tr>
+        </thead>
         <template v-for="user in users">
             <tr>
                 <td>{{ user.tag }}</td>
-                <td></td>
                 <td>{{ user.games }}</td>
                 <td>{{ user.wins }}</td>
                 <td>{{ user.losses }}</td>
                 <td>{{ user.winRatio }}</td>
-                <td></td>
                 <td>{{ user.stocksLost }}</td>
                 <td>{{ user.stocksLostRatio }}</td>
                 <td>{{ user.stocksTaken }}</td>
@@ -51,18 +49,23 @@
         </template>
     </table>
     <h3>Matches</h3>
-    <table>
-        <tr>
-            <td>Date</td>
-            <td>Player 1</td>
-            <td>Player 2</td>
-        </tr>
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Date</th>
+                <th>Player 1</th>
+                <th>Player 2</th>
+            </tr>
+        </thead>
         <tr v-for="match in sortedMatchesByDate">
             <td>
                 {{ match.match.date | formatDate}}
             </td>
             <td v-for="player in match.players">
             <span v-bind:class="{'font-weight-bold': player.is_winner}">
+                {{ player.user.tag}} -
+            </span>
+            <span>
               {{ player.character.name}}</span>:<span>{{ player.data.stocks }}
             </span>
             </td>

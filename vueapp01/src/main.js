@@ -3,8 +3,8 @@
 import Vue from 'vue'
 import axios from 'axios'
 import BootstrapVue from 'bootstrap-vue'
-/*import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'*/
+import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
 import moment from 'moment'
 
 Vue.use(BootstrapVue);
@@ -118,6 +118,8 @@ new Vue({
         self.matches = matchesResponse.data.data;
 
         self.users = calculatePlayerStats(self.matches, self.users);
+
+
 
         return self.matches;
       });
