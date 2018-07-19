@@ -46,6 +46,19 @@
                 <td>{{ user.stocksTaken }}</td>
                 <td>{{ user.stocksTakenRatio }}</td>
             </tr>
+            <template v-for="character in user.characters">
+                <tr>
+                    <td>{{ character.name }}</td>
+                    <td>{{ character.games }}</td>
+                    <td>{{ character.wins }}</td>
+                    <td>{{ character.losses }}</td>
+                    <td>{{ character.winRatio }}</td>
+                    <td>{{ character.stocksLost }}</td>
+                    <td>{{ character.stocksLostRatio }}</td>
+                    <td>{{ character.stocksTaken }}</td>
+                    <td>{{ character.stocksTakenRatio }}</td>
+                </tr>
+            </template>
         </template>
     </table>
     <h3>Matches</h3>
