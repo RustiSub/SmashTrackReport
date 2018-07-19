@@ -16,7 +16,10 @@ Vue.filter('formatDate', function(value) {
   }
 });
 
-let calculatePlayerStats = function(matches, users) {
+let calculatePlayerStats = function(self) {
+  let matches = self.matches;
+  let users = self.users;
+
   Array.from(users).forEach(function(user) {
     user.games = 0;
     user.wins = 0;
@@ -28,14 +31,16 @@ let calculatePlayerStats = function(matches, users) {
     user.stocksLostRatio = 0;
 
     user.matchesPlayed = [];
-    user.characters = [];
+    user.characters = {};
+
+    user.charactersVisible = true;
 
     Array.from(matches).forEach(function(matchData) {
       Array.from(matchData.players).forEach(function(player) {
         if (player.user.id === user.id) {
           user.matchesPlayed.push(matchData);
 
-          if(!user.characters.hasOwnProperty(player.character.name)){
+          if (!user.characters[player.character.name]) {
             user.characters[player.character.name] = player.character;
           }
 
@@ -87,13 +92,20 @@ let calculatePlayerStats = function(matches, users) {
 
   return users;
 };
-
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
-  data: {
-    matches: [],
-    users: [],
+  data: function () {
+    return {
+      matches: [],
+      users: [],
+      showCharacters: false
+    }
+  },
+  methods: {
+    toggleCharacters() {
+      this.showCharacters = !this.showCharacters;
+    }
   },
   computed: {
     sortedMatchesByDate: function() {
@@ -108,7 +120,7 @@ new Vue({
       return this.matches.sort(compare);
     }
   },
-  created() {
+  mounted() {
     let self = this;
 
     axios.post('https://smashtrack.benn0.be/login', {
@@ -127,8 +139,6 @@ new Vue({
         withCredentials: true
       }).then(usersResponse => {
         self.users = usersResponse.data.data;
-
-        return self.users;
       });
 
       axios.get('https://smashtrack.benn0.be/matches', {
@@ -138,13 +148,8 @@ new Vue({
         withCredentials: true
       }).then(matchesResponse => {
         self.matches = matchesResponse.data.data;
-
-        self.users = calculatePlayerStats(self.matches, self.users);
-
-
-
-        return self.matches;
+        calculatePlayerStats(self);
       });
     });
   }
-})
+});

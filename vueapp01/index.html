@@ -23,6 +23,7 @@
     <table class="table table-striped">
         <thead class="thead-dark">
             <tr>
+                <th @click="toggleCharacters">+</th>
                 <th>Player</th>
                 <th>Games</th>
                 <th>Wins</th>
@@ -35,7 +36,8 @@
             </tr>
         </thead>
         <template v-for="user in users">
-            <tr>
+            <tr class="table-primary">
+                <td></td>
                 <td>{{ user.tag }}</td>
                 <td>{{ user.games }}</td>
                 <td>{{ user.wins }}</td>
@@ -47,7 +49,8 @@
                 <td>{{ user.stocksTakenRatio }}</td>
             </tr>
             <template v-for="character in user.characters">
-                <tr>
+                <tr :class="[user.tag]" v-show="showCharacters">
+                    <td></td>
                     <td>{{ character.name }}</td>
                     <td>{{ character.games }}</td>
                     <td>{{ character.wins }}</td>
