@@ -28,7 +28,7 @@
                 <th>Games</th>
                 <th>Wins</th>
                 <th>Losses</th>
-                <th>Win %</th>
+                <th>Avg Win</th>
                 <th>Stocks Lost</th>
                 <th>Avg Stocks Lost</th>
                 <th>Stocks Taken</th>
@@ -69,13 +69,17 @@
         <thead class="thead-dark">
             <tr>
                 <th>Date</th>
+                <th>Stage</th>
                 <th>Player 1</th>
                 <th>Player 2</th>
             </tr>
         </thead>
         <tr v-for="match in sortedMatchesByDate">
             <td>
-                {{ match.match.date | formatDate}}
+                {{ match.match.date | formatDate }}
+            </td>
+            <td>
+                {{ match.match.stage.name }}
             </td>
             <td v-for="player in match.players">
             <span v-bind:class="{'font-weight-bold': player.is_winner}">
