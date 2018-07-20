@@ -95,6 +95,38 @@ let calculatePlayerStats = function(self) {
 
   return users;
 };
+
+Vue.component('blog-post', {
+  props: [
+      'character',
+      'show'
+  ],
+  data: function () {
+    return {
+      showCharacters: true
+    }
+  },
+  methods: {
+    ratio: function(number, total) {
+      return (number / total).toFixed(3);
+    },
+  },
+  template: `
+    <tr :class="[show, 'collapse out']">      
+      <td></td>
+      <td>{{ character.name }}</td>
+      <td>{{ character.games }}</td>
+      <td>{{ character.wins }}</td>
+      <td>{{ character.losses }}</td>
+      <td>{{ ratio(character.wins, character.games) }}</td>
+      <td>{{ character.stocksLost }}</td>
+      <td>{{ ratio(character.stocksLost, character.games) }}</td>
+      <td>{{ character.stocksTaken }}</td>
+      <td>{{ ratio(character.stocksTaken, character.games) }}</td>      
+    </tr>
+  `
+});
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

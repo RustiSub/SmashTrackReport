@@ -37,7 +37,12 @@
         </thead>
         <template v-for="user in users">
             <tr class="table-primary">
-                <td></td>
+                <td>
+                    <button class="btn btn-primary" type="button" data-toggle="collapse" :data-target="['.' + user.tag]"
+                            aria-expanded="false">Toggle
+                        both elements
+                    </button>
+                </td>
                 <td>{{ user.tag }}</td>
                 <td>{{ user.games }}</td>
                 <td>{{ user.wins }}</td>
@@ -48,7 +53,13 @@
                 <td>{{ user.stocksTaken }}</td>
                 <td>{{ user.stocksTakenRatio }}</td>
             </tr>
-            <template v-for="character in user.characters">
+            <blog-post
+                    v-for="character in user.characters"
+                    v-bind:key="character.id + user.tag"
+                    v-bind:character="character"
+                    v-bind:show="user.tag"
+            ></blog-post>
+<!--            <template v-for="character in user.characters">
                 <tr :class="[user.tag]" v-show="showCharacters">
                     <td></td>
                     <td>{{ character.name }}</td>
@@ -61,7 +72,7 @@
                     <td>{{ character.stocksTaken }}</td>
                     <td>{{ ratio(character.stocksTaken, character.games) }}</td>
                 </tr>
-            </template>
+            </template>-->
         </template>
     </table>
     <h3>Matches</h3>
