@@ -63,12 +63,15 @@
                     {{ match.match.stage.name }}
                 </td>
                 <td v-for="player in match.players">
-            <span v-bind:class="{'font-weight-bold': player.is_winner}">
-                {{ player.user.tag}} -
-            </span>
+                    <span v-bind:class="{'font-weight-bold': player.is_winner}">
+                        {{ player.user.tag}} -
+                    </span>
                     <span>
-              {{ player.character.name}}</span>:<span>{{ player.data.stocks }}
-            </span>
+                      {{ player.character.name }}</span>:
+                    <span>{{ player.data.stocks }}</span>:
+                    <span v-for="stock in stocksToArray(player.data.stocks)">
+                        <img v-bind:src=mapCharacterStockIcon(player.character.name) v-bind:alt="player.character.name" width="20" height="20" />
+                    </span>
                 </td>
             </tr>
         </table>
@@ -160,11 +163,8 @@
 
   export default {
     name: 'leaderboard',
-    data() {
-      return {}
-    },
     filters: {
-      formatDate: function(value) {
+      formatDate: function (value) {
         if (value) {
           return moment(String(value)).format('MM/DD/YYYY')
         }
@@ -177,6 +177,18 @@
       ratio: function (number, total) {
         return (number / total).toFixed(3);
       },
+      mapCharacterStockIcon: function (characterName) {
+        return require("../assets/icons/" + characterName.trim().replace(/\s/g, "").replace(".", "") + ".png");
+      },
+      stocksToArray: function(numberOfStocks) {
+        var stocks = [];
+
+        for (var i = 0; i < numberOfStocks; i++) {
+          stocks.push(i);
+        }
+
+        return stocks;
+      }
     },
     data: function () {
       return {
