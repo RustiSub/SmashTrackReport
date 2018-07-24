@@ -2,96 +2,10 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>smashtrackreport</title>
+    <title>Smacker Board</title>
 </head>
-<style>
-    #app {
-        font-family: 'Avenir', Helvetica, Arial, sans-serif;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        text-align: center;
-        color: #2c3e50;
-        margin-top: 60px;
-    }
-</style>
 <body>
-<div id="app">
-    <h1>Smacker</h1>
-    <h2>KickAss Logo</h2>
-    <h3>Leaderboard</h3>
-    <table class="table table-striped">
-        <thead class="thead-dark">
-            <tr>
-                <th @click="toggleCharacters">+</th>
-                <th>Player</th>
-                <th>Games</th>
-                <th>Wins</th>
-                <th>Losses</th>
-                <th>Avg Win</th>
-                <th>Stocks Lost</th>
-                <th>Avg Stocks Lost</th>
-                <th>Stocks Taken</th>
-                <th>Avg Stocks Taken</th>
-            </tr>
-        </thead>
-        <template v-for="user in users">
-            <tr class="table-primary">
-                <td></td>
-                <td>{{ user.tag }}</td>
-                <td>{{ user.games }}</td>
-                <td>{{ user.wins }}</td>
-                <td>{{ user.losses }}</td>
-                <td>{{ user.winRatio }}</td>
-                <td>{{ user.stocksLost }}</td>
-                <td>{{ user.stocksLostRatio }}</td>
-                <td>{{ user.stocksTaken }}</td>
-                <td>{{ user.stocksTakenRatio }}</td>
-            </tr>
-            <template v-for="character in user.characters">
-                <tr :class="[user.tag]" v-show="showCharacters">
-                    <td></td>
-                    <td>{{ character.name }}</td>
-                    <td>{{ character.games }}</td>
-                    <td>{{ character.wins }}</td>
-                    <td>{{ character.losses }}</td>
-                    <td>{{ ratio(character.wins, character.games) }}</td>
-                    <td>{{ character.stocksLost }}</td>
-                    <td>{{ ratio(character.stocksLost, character.games) }}</td>
-                    <td>{{ character.stocksTaken }}</td>
-                    <td>{{ ratio(character.stocksTaken, character.games) }}</td>
-                </tr>
-            </template>
-        </template>
-    </table>
-    <h3>Matches</h3>
-    <table class="table table-striped">
-        <thead class="thead-dark">
-            <tr>
-                <th>Date</th>
-                <th>Stage</th>
-                <th>Player 1</th>
-                <th>Player 2</th>
-            </tr>
-        </thead>
-        <tr v-for="match in sortedMatchesByDate">
-            <td>
-                {{ match.match.date | formatDate }}
-            </td>
-            <td>
-                {{ match.match.stage.name }}
-            </td>
-            <td v-for="player in match.players">
-            <span v-bind:class="{'font-weight-bold': player.is_winner}">
-                {{ player.user.tag}} -
-            </span>
-            <span>
-              {{ player.character.name}}</span>:<span>{{ player.data.stocks }}
-            </span>
-            </td>
-        </tr>
-    </table>
-</div>
+<div id="app"></div>
 <!-- built files will be auto injected -->
 </body>
 </html>
