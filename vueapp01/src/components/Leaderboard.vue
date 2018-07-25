@@ -88,7 +88,7 @@
                             </tr>
                         </table>
                     </td>
-                    <td style="vertical-align: middle">
+                    <td style="vertical-align: middle;width: 224px;">
                         {{ match.match.stage.name }}
                     </td>
                 </tr>
