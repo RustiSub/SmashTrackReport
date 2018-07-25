@@ -7,6 +7,7 @@
 </template>
 <script>
   import LeaderBoard from './components/Leaderboard.vue'
+
   export default {
     name: 'app',
     components: {

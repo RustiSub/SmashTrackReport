@@ -1,5 +1,27 @@
 <template>
     <div class="leaderboard">
+        <modal name="modal-match-player" @before-open="beforeOpen" :width="1000" :height="720">
+            <table class="table">
+                <tr>
+                    <td>
+                        <twitch-player :video="video" ref="matchPlayer" v-on:ready="playerReady"></twitch-player>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <template v-for="(player, index) in playingMatch.players">
+                            <span v-for="stock in stocksToArray(playingMatch.match.stocks - player.data.stocks)">
+                                <button value="Stock" v-on:click="seekStock(stock.timeStamp)">
+                                    <img v-bind:src=mapCharacterStockIcon(player.character.name)
+                                         v-bind:title="player.character.name + ' - ' + player.data.stocks"
+                                         v-bind:alt="player.character.name" width="20" height="20"/>
+                                </button>
+                            </span>
+                        </template>
+                    </td>
+                </tr>
+            </table>
+        </modal>
         <h3>Leaderboard</h3>
         <table class="table">
             <thead class="thead-dark">
@@ -16,7 +38,7 @@
                 <th>Avg Stocks Taken</th>
             </tr>
             </thead>
-            <template v-for="user in users">
+            <template v-for="user in sortUserByGames(users)">
                 <tr class="table-primary">
                     <td></td>
                     <td>{{ user.tag }}</td>
@@ -54,6 +76,7 @@
         <table class="table table-striped">
             <thead class="thead-dark">
             <tr>
+                <th>VOD</th>
                 <th>Date</th>
                 <!--<th>Matchup</th>-->
                 <th>Result</th>
@@ -62,6 +85,11 @@
             </thead>
             <template v-for="match in sortedMatchesByDate">
                 <tr>
+                    <td>
+                        <button value="Stock" v-on:click="show(match)">
+                            View
+                        </button>
+                    </td>
                     <td style="vertical-align: middle">
                         {{ match.match.date | formatDate }}
                     </td>
@@ -104,6 +132,7 @@
 <script>
   import axios from 'axios';
   import moment from 'moment';
+  import VueTwitchPlayer from './TwitchPlayer.vue';
 
   let calculatePlayerStats = function (self) {
     let matches = self.matches;
@@ -185,8 +214,13 @@
     return users;
   };
 
+  let player;
+
   export default {
     name: 'leaderboard',
+    components: {
+      'twitch-player': VueTwitchPlayer
+    },
     filters: {
       formatDate: function (value) {
         if (value) {
@@ -207,14 +241,51 @@
       stocksToArray: function(numberOfStocks) {
         var stocks = [];
 
+        //TODO: Use actual timestamps from MetaData
         for (var i = 0; i < numberOfStocks; i++) {
-          stocks.push(i);
+          stocks.push({
+            timeStamp: 120,
+          });
         }
 
         return stocks;
       },
+      sortUserByGames: function (users) {
+        function compare(a, b) {
+          if (a.wins > b.wins)
+            return -1;
+          if (a.wins < b.wins)
+            return 1;
+
+          if (a.losses > b.losses)
+            return 1;
+          if (a.losses < b.losses)
+            return -1;
+
+          if (a.games > b.games)
+            return -1;
+          if (a.games < b.games)
+            return 1;
+
+          return 0;
+        }
+
+        if (!users) {
+          return [];
+        }
+
+        let sortable = [];
+
+        for (let key in users) {
+          if (users.hasOwnProperty(key)) {
+            sortable.push(users[key]);
+          }
+        }
+
+        return sortable.sort(compare);
+      },
       sortUserCharactersByGames: function (characters) {
-        function compare(a, b, test) {
+        function compare(a, b) {
           if (a.games > b.games)
             return -1;
           if (a.games < b.games)
@@ -246,13 +317,32 @@
         }
 
         return sortable.sort(compare);
+      },
+      playerReady: function(player) {
+        self.player = player;
+      },
+      seekStock: function(timeStamp) {
+        self.player.seek(timeStamp);
+        self.player.play();
+      },
+      show (match) {
+        this.$modal.show('modal-match-player', { match: match});
+      },
+      hide () {
+        this.$modal.hide('modal-match-player');
+      },
+      beforeOpen(event) {
+        this.playingMatch = event.params.match;
       }
     },
     data: function () {
       return {
         matches: [],
         users: [],
-        showCharacters: false
+        showCharacters: false,
+        video: '288585781',
+        playingMatch: {},
+        player: {}
       }
     },
     computed: {
