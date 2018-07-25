@@ -1,7 +1,7 @@
 <template>
     <div class="leaderboard">
         <h3>Leaderboard</h3>
-        <table class="table table-striped">
+        <table class="table">
             <thead class="thead-dark">
             <tr>
                 <th @click="toggleCharacters">+</th>
@@ -46,7 +46,7 @@
             </template>
         </table>
         <h3>Matches</h3>
-        <table class="table">
+        <table class="table table-striped">
             <thead class="thead-dark">
             <tr>
                 <th>Date</th>
@@ -197,7 +197,7 @@
         return (number / total).toFixed(3);
       },
       mapCharacterStockIcon: function (characterName) {
-        return require("../assets/icons/" + characterName.trim().replace(/\s/g, "").replace(".", "") + ".png");
+        return require("../assets/characters/" + characterName.toLowerCase().trim().replace(/\s/g, "").replace(".", "") + ".png");
       },
       stocksToArray: function(numberOfStocks) {
         var stocks = [];
@@ -274,7 +274,7 @@
         width: 40px;
     }
     .col-vs {
-        width: 50px;
+        width: 10px;
     }
     .col-stocks {
         width: 20px;
