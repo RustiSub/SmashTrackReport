@@ -29,10 +29,15 @@
                     <td>{{ user.stocksTaken }}</td>
                     <td>{{ user.stocksTakenRatio }}</td>
                 </tr>
-                <template v-for="character in user.characters">
+                <template v-for="character in sortUserCharactersByGames(user.characters)">
                     <tr :class="[user.tag]" v-show="showCharacters">
                         <td></td>
-                        <td>{{ character.name }}</td>
+                        <td>
+                            <img v-bind:src=mapCharacterStockIcon(character.name)
+                                 v-bind:title="character.name"
+                                 v-bind:alt="character.name" width="30" height="30"/>
+                        </td>
+
                         <td>{{ character.games }}</td>
                         <td>{{ character.wins }}</td>
                         <td>{{ character.losses }}</td>
@@ -207,6 +212,40 @@
         }
 
         return stocks;
+      },
+      sortUserCharactersByGames: function (characters) {
+        function compare(a, b, test) {
+          if (a.games > b.games)
+            return -1;
+          if (a.games < b.games)
+            return 1;
+
+          if (a.wins > b.wins)
+            return -1;
+          if (a.wins < b.wins)
+            return 1;
+
+          if (a.losses > b.losses)
+            return 1;
+          if (a.losses < b.losses)
+            return -1;
+
+          return 0;
+        }
+
+        if (!characters) {
+          return [];
+        }
+
+        let sortable = [];
+
+        for (let key in characters) {
+          if (characters.hasOwnProperty(key)) {
+            sortable.push(characters[key]);
+          }
+        }
+
+        return sortable.sort(compare);
       }
     },
     data: function () {
