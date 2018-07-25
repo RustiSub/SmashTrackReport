@@ -46,34 +46,53 @@
             </template>
         </table>
         <h3>Matches</h3>
-        <table class="table table-striped">
+        <table class="table">
             <thead class="thead-dark">
             <tr>
                 <th>Date</th>
+                <!--<th>Matchup</th>-->
+                <th>Result</th>
                 <th>Stage</th>
-                <th>Player 1</th>
-                <th>Player 2</th>
             </tr>
             </thead>
-            <tr v-for="match in sortedMatchesByDate">
-                <td>
-                    {{ match.match.date | formatDate }}
-                </td>
-                <td>
-                    {{ match.match.stage.name }}
-                </td>
-                <td v-for="player in match.players">
-                    <span v-bind:class="{'font-weight-bold': player.is_winner}">
-                        {{ player.user.tag}} -
-                    </span>
-                    <span>
-                      {{ player.character.name }}</span>:
-                    <span>{{ player.data.stocks }}</span>:
-                    <span v-for="stock in stocksToArray(player.data.stocks)">
-                        <img v-bind:src=mapCharacterStockIcon(player.character.name) v-bind:alt="player.character.name" width="20" height="20" />
-                    </span>
-                </td>
-            </tr>
+            <template v-for="match in sortedMatchesByDate">
+                <tr>
+                    <td style="vertical-align: middle">
+                        {{ match.match.date | formatDate }}
+                    </td>
+                    <td style="vertical-align: middle">
+                        <table style="margin:auto; width:50%" class="table-borderless table-sm table-result">
+                            <tr>
+                                <template v-for="(player, index) in match.players">
+                                    <td class="col-player">
+                                        <span v-bind:class="{'font-weight-bold': player.is_winner}">
+                                            {{ player.user.tag }}
+                                        </span>
+                                    </td>
+                                    <td class="col-stocks">
+                                        <span v-for="stock in stocksToArray(player.data.stocks)">
+                                                <img v-bind:class="{ 'stock-loser': !player.is_winner}"
+                                                     v-bind:src=mapCharacterStockIcon(player.character.name)
+                                                     v-bind:title="player.character.name + ' - ' + player.data.stocks"
+                                                     v-bind:alt="player.character.name" width="20" height="20"/>
+                                            </span>
+                                        <span v-if="player.data.stocks == 0">
+                                                <img v-bind:class="{ 'stock-loser': !player.is_winner}"
+                                                     v-bind:src=mapCharacterStockIcon(player.character.name)
+                                                     v-bind:title="player.character.name + ' - ' + player.data.stocks"
+                                                     v-bind:alt="player.character.name" width="20" height="20"/>
+                                            </span>
+                                    </td>
+                                    <td class="col-vs" v-if="index != match.players.length - 1"> vs </td>
+                                </template>
+                            </tr>
+                        </table>
+                    </td>
+                    <td style="vertical-align: middle">
+                        {{ match.match.stage.name }}
+                    </td>
+                </tr>
+            </template>
         </table>
     </div>
 </template>
@@ -246,4 +265,21 @@
 </script>
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+    .table-result {
+        table-layout: fixed;
+        width: 100px;
+        border: none;
+    }
+    .col-player {
+        width: 40px;
+    }
+    .col-vs {
+        width: 50px;
+    }
+    .col-stocks {
+        width: 20px;
+    }
+    .stock-loser {
+        opacity: 0.5;
+    }
 </style>
