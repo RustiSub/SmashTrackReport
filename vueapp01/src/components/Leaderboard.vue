@@ -15,22 +15,50 @@
                 </tr>
                 <tr>
                     <td>
-                        <button class="btn btn-light" v-on:click="playerSeekTimeStamp(getMatchBookMark(playingMatch)['begin'])">
-                            <font-awesome-icon icon="hourglass-start"></font-awesome-icon>
-                        </button>
-                        <template v-for="(player, index) in playingMatch.players">
-                            <span v-for="(stock, stockIndex) in stocksToArray(playingMatch.match.stocks - player.data.stocks)"
-                                  class="time-line-stock">
-                                <button class="btn btn-light" value="Stock" v-on:click="playerSeekTimeStamp(seekStockTimeStamp(playingMatch, player, stockIndex + 1))">
-                                    <img v-bind:src=mapCharacterStockIcon(player.character.name)
-                                         v-bind:title="player.character.name + ' - ' + player.data.stocks"
-                                         v-bind:alt="player.character.name" width="20" height="20"/>
-                                </button>
+                        <div class="time-line">
+                            <span class="btn btn-light" v-on:click="playerSeekTimeStamp(getMatchBookMark(playingMatch)['begin'])">
+                                <font-awesome-icon icon="hourglass-start"></font-awesome-icon>
                             </span>
-                        </template>
-                        <button class="btn btn-light" v-on:click="playerSeekTimeStamp(getMatchBookMark(playingMatch)['end'])">
-                            <font-awesome-icon icon="hourglass-end"></font-awesome-icon>
-                        </button>
+                            <template v-for="(player, index) in playingMatch.players">
+                                <span v-for="(stock, stockIndex) in stocksToArray(playingMatch.match.stocks - player.data.stocks)"
+                                      class=""
+                                >
+                                    <button class="btn btn-light" value="Stock" v-on:click="placeBookmark(playingMatch, player.id, stockIndex + 1)">
+                                        <img v-bind:src=mapCharacterStockIcon(player.character.name)
+                                             v-bind:title="player.character.name + ' - ' + player.data.stocks"
+                                             v-bind:alt="player.character.name" width="20" height="20"/>
+                                    </button>
+                                </span>
+                            </template>
+                            <span class="btn btn-light" v-on:click="playerSeekTimeStamp(getMatchBookMark(playingMatch)['end'])">
+                                <font-awesome-icon icon="hourglass-end"></font-awesome-icon>
+                            </span>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="horizontal-line"></div>
+                        <div class="time-line">
+                            <span class="btn btn-light time-line-bookmark time-line-begin" v-on:click="playerSeekTimeStamp(getMatchBookMark(playingMatch)['begin'])">
+                                <font-awesome-icon icon="hourglass-start"></font-awesome-icon>
+                            </span>
+                                <template v-for="(player, index) in playingMatch.players">
+                                <span v-for="(stock, stockIndex) in stocksToArray(playingMatch.match.stocks - player.data.stocks)"
+                                      class="time-line-bookmark"
+                                      v-bind:style="timeLineBookmark(playingMatch, player.id, stockIndex + 1)"
+                                >
+                                    <button class="btn btn-light" value="Stock" v-on:click="playerSeekTimeStamp(seekStockTimeStamp(playingMatch, player, stockIndex + 1))">
+                                        <img v-bind:src=mapCharacterStockIcon(player.character.name)
+                                             v-bind:title="player.character.name + ' - ' + player.data.stocks"
+                                             v-bind:alt="player.character.name" width="20" height="20"/>
+                                    </button>
+                                </span>
+                                </template>
+                                <span class="btn btn-light time-line-bookmark time-line-end" v-on:click="playerSeekTimeStamp(getMatchBookMark(playingMatch)['end'])">
+                                <font-awesome-icon icon="hourglass-end"></font-awesome-icon>
+                            </span>
+                        </div>
                     </td>
                 </tr>
             </table>
@@ -330,7 +358,7 @@
       playerPlaying: function() {
         if (!self.videoPlayer.seekBookmarkPaused) {
           self.videoPlayer.pause();
-          self.videoPlayer.seek(100);
+          self.videoPlayer.seek(0);
 
           self.videoPlayer.seekBookmarkPaused = true;
         }
@@ -346,26 +374,35 @@
 
         bookmarks[match.match.id] = bookmarks[match.match.id] || {
           'begin': 0,
-          'end': 100
+          'end': 500
         };
 
         localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
 
         return bookmarks[match.match.id];
       },
+      placeBookmark: function(match, playerId, stockIndex) {
+        if (!match) {
+          return;
+        }
+
+        let bookmark = this.getMatchBookMark(match);
+        let bookmarks = this.getBookMarks();
+
+        if (!playerId || !stockIndex) {
+          return;
+        }
+
+        bookmark[playerId][stockIndex] = self.videoPlayer.getCurrentTime();
+
+        bookmarks[match.match.id] = bookmark;
+        localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+      },
       seekStockTimeStamp: function(match, player, stockNumber) {
         let bookmark = this.getMatchBookMark(match);
 
         bookmark[player.id] = bookmark[player.id] || {};
         bookmark[player.id][stockNumber] = bookmark[player.id][stockNumber] || 0;
-
-        if (bookmark[player.id][stockNumber]) {
-        } else {
-          bookmark[player.id][stockNumber] = self.videoPlayer.getCurrentTime();
-          let bookmarks = this.getBookMarks();
-          bookmarks[match.match.id] = bookmark;
-          localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
-        }
 
         return bookmark[player.id][stockNumber];
       },
@@ -378,9 +415,12 @@
       beforeOpen(event) {
         this.playingMatch = event.params.match;
       },
-      timeLineBookmark: function(width) {
+      timeLineBookmark: function(playingMatch, playerId, stockIndex) {
+        let timeStamp = this.getMatchBookMark(playingMatch)[playerId][stockIndex];
+        let width = timeStamp * (800 / 500);
+
         return {
-//          'width': width + '%',
+          'left': width + 'px',
 //          'background-color': 'yellow'
         };
       }
@@ -463,8 +503,14 @@
     }
     .stock-lost {
         opacity: 0.25;
-    },
-    .time-line-stock {
-
+    }
+    .time-line-bookmark {
+        position: absolute;
+    }
+    .time-line-begin {
+        left: 0;
+    }
+    .time-line-end {
+        left: 800px;
     }
 </style>
