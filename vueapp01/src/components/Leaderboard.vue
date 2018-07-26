@@ -4,20 +4,33 @@
             <table class="table">
                 <tr>
                     <td>
-                        <twitch-player :video="video" ref="matchPlayer" v-on:ready="playerReady"></twitch-player>
+                        <twitch-player
+                                :video="video"
+                                ref="matchPlayer"
+                                v-on:ready="playerReady"
+                                v-on:playing="playerPlaying"
+                        >
+                        </twitch-player>
                     </td>
                 </tr>
                 <tr>
                     <td>
+                        <button class="btn btn-light" v-on:click="playerSeekTimeStamp(getMatchBookMark(playingMatch)['begin'])">
+                            <font-awesome-icon icon="hourglass-start"></font-awesome-icon>
+                        </button>
                         <template v-for="(player, index) in playingMatch.players">
-                            <span v-for="stock in stocksToArray(playingMatch.match.stocks - player.data.stocks)">
-                                <button value="Stock" v-on:click="seekStock(stock.timeStamp)">
+                            <span v-for="(stock, stockIndex) in stocksToArray(playingMatch.match.stocks - player.data.stocks)"
+                                  class="time-line-stock">
+                                <button class="btn btn-light" value="Stock" v-on:click="playerSeekTimeStamp(seekStockTimeStamp(playingMatch, player, stockIndex + 1))">
                                     <img v-bind:src=mapCharacterStockIcon(player.character.name)
                                          v-bind:title="player.character.name + ' - ' + player.data.stocks"
                                          v-bind:alt="player.character.name" width="20" height="20"/>
                                 </button>
                             </span>
                         </template>
+                        <button class="btn btn-light" v-on:click="playerSeekTimeStamp(getMatchBookMark(playingMatch)['end'])">
+                            <font-awesome-icon icon="hourglass-end"></font-awesome-icon>
+                        </button>
                     </td>
                 </tr>
             </table>
@@ -76,20 +89,13 @@
         <table class="table table-striped">
             <thead class="thead-dark">
             <tr>
-                <th>VOD</th>
                 <th>Date</th>
-                <!--<th>Matchup</th>-->
                 <th>Result</th>
                 <th>Stage</th>
             </tr>
             </thead>
             <template v-for="match in sortedMatchesByDate">
                 <tr>
-                    <td>
-                        <button value="Stock" v-on:click="show(match)">
-                            View
-                        </button>
-                    </td>
                     <td style="vertical-align: middle">
                         {{ match.match.date | formatDate }}
                     </td>
@@ -97,26 +103,25 @@
                         <table style="margin:auto; width:50%" class="table-borderless table-sm table-result">
                             <tr>
                                 <template v-for="(player, index) in match.players">
-                                    <td class="col-player">
+                                    <td class="col-player" style="vertical-align: middle">
                                         <span v-bind:class="{'font-weight-bold': player.is_winner}">
                                             {{ player.user.tag }}
                                         </span>
                                     </td>
-                                    <td class="col-stocks">
-                                        <span v-for="stock in stocksToArray(player.data.stocks)">
-                                                <img v-bind:class="{ 'stock-loser': !player.is_winner}"
-                                                     v-bind:src=mapCharacterStockIcon(player.character.name)
-                                                     v-bind:title="player.character.name + ' - ' + player.data.stocks"
-                                                     v-bind:alt="player.character.name" width="20" height="20"/>
-                                            </span>
-                                        <span v-if="player.data.stocks == 0">
-                                                <img v-bind:class="{ 'stock-loser': !player.is_winner}"
-                                                     v-bind:src=mapCharacterStockIcon(player.character.name)
-                                                     v-bind:title="player.character.name + ' - ' + player.data.stocks"
-                                                     v-bind:alt="player.character.name" width="20" height="20"/>
-                                            </span>
+                                    <td class="col-stocks" style="vertical-align: middle">
+                                        <span v-for="(stock, stockIndex) in stocksToArray(match.match.stocks)">
+                                            <img v-bind:class="{ 'stock-lost': player.data.stocks <= stockIndex}"
+                                                 v-bind:src=mapCharacterStockIcon(player.character.name)
+                                                 v-bind:title="player.character.name + ' - ' + player.data.stocks"
+                                                 v-bind:alt="player.character.name" width="20" height="20"/>
+                                        </span>
                                     </td>
-                                    <td class="col-vs" v-if="index != match.players.length - 1"> vs </td>
+                                    <td class="col-vs" v-if="index != match.players.length - 1" style="vertical-align: middle"> vs </td>
+                                    <td class="col-vs" v-if="index == match.players.length - 1" style="vertical-align: middle">
+                                        <button v-on:click="show(match)" title="Watch VOD" class="btn btn-light">
+                                            <font-awesome-icon icon="eye"></font-awesome-icon>
+                                        </button>
+                                    </td>
                                 </template>
                             </tr>
                         </table>
@@ -318,21 +323,66 @@
 
         return sortable.sort(compare);
       },
-      playerReady: function(player) {
-        self.player = player;
+      playerReady: function(videoPlayer) {
+        self.videoPlayer = videoPlayer;
+        self.videoPlayer.seekBookmarkPaused = false;
       },
-      seekStock: function(timeStamp) {
-        self.player.seek(timeStamp);
-        self.player.play();
+      playerPlaying: function() {
+        if (!self.videoPlayer.seekBookmarkPaused) {
+          self.videoPlayer.pause();
+          self.videoPlayer.seek(100);
+
+          self.videoPlayer.seekBookmarkPaused = true;
+        }
       },
-      show (match) {
-        this.$modal.show('modal-match-player', { match: match});
+      playerSeekTimeStamp: function(timeStamp) {
+        self.videoPlayer.seek(timeStamp);
+      },
+      getBookMarks: function() {
+        return JSON.parse(localStorage.getItem('bookmarks')) || {};
+      },
+      getMatchBookMark: function(match) {
+        let bookmarks = this.getBookMarks();
+
+        bookmarks[match.match.id] = bookmarks[match.match.id] || {
+          'begin': 0,
+          'end': 100
+        };
+
+        localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+
+        return bookmarks[match.match.id];
+      },
+      seekStockTimeStamp: function(match, player, stockNumber) {
+        let bookmark = this.getMatchBookMark(match);
+
+        bookmark[player.id] = bookmark[player.id] || {};
+        bookmark[player.id][stockNumber] = bookmark[player.id][stockNumber] || 0;
+
+        if (bookmark[player.id][stockNumber]) {
+        } else {
+          bookmark[player.id][stockNumber] = self.videoPlayer.getCurrentTime();
+          let bookmarks = this.getBookMarks();
+          bookmarks[match.match.id] = bookmark;
+          localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+        }
+
+        return bookmark[player.id][stockNumber];
+      },
+      show (match, stockIndex) {
+        this.$modal.show('modal-match-player', {match: match});
       },
       hide () {
         this.$modal.hide('modal-match-player');
       },
       beforeOpen(event) {
         this.playingMatch = event.params.match;
+      },
+      timeLineBookmark: function(width) {
+        return {
+//          'width': width + '%',
+//          'background-color': 'yellow'
+        };
       }
     },
     data: function () {
@@ -406,9 +456,15 @@
         width: 10px;
     }
     .col-stocks {
-        width: 20px;
+        width: 50px;
     }
     .stock-loser {
         opacity: 0.5;
+    }
+    .stock-lost {
+        opacity: 0.25;
+    },
+    .time-line-stock {
+
     }
 </style>
