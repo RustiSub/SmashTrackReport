@@ -1,67 +1,60 @@
 <template>
     <div class="leaderboard">
         <modal name="modal-match-player" @before-open="beforeOpen" :width="1000" :height="720">
-            <table class="table">
-                <tr>
-                    <td>
-                        <twitch-player
-                                :video="video"
-                                ref="matchPlayer"
-                                v-on:ready="playerReady"
-                                v-on:playing="playerPlaying"
-                        >
-                        </twitch-player>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="time-line">
-                            <span class="btn btn-light" v-on:click="playerSeekTimeStamp(getMatchBookMark(playingMatch)['begin'])">
-                                <font-awesome-icon icon="hourglass-start"></font-awesome-icon>
-                            </span>
+            <div id="replayPlayerWindow">
+                <div class="replay-container">
+                    <twitch-player
+                            :video="video"
+                            width="1000"
+                            height="563"
+                            ref="matchPlayer"
+                            v-on:ready="playerReady"
+                            v-on:playing="playerPlaying"
+                    >
+                    </twitch-player>
+                </div>
+                <div class="time-line-bookmarks">
+                    <div class="time-line-bookmark-control">
+                        <span class="btn btn-light" v-on:click="playerSeekTimeStamp(getMatchBookMark(playingMatch)['begin'])">
+                            <font-awesome-icon icon="hourglass-start"></font-awesome-icon>
+                        </span>
                             <template v-for="(player, index) in playingMatch.players">
-                                <span v-for="(stock, stockIndex) in stocksToArray(playingMatch.match.stocks - player.data.stocks)"
-                                      class=""
-                                >
-                                    <button class="btn btn-light" value="Stock" v-on:click="placeBookmark(playingMatch, player.id, stockIndex + 1)">
-                                        <img v-bind:src=mapCharacterStockIcon(player.character.name)
-                                             v-bind:title="player.character.name + ' - ' + player.data.stocks"
-                                             v-bind:alt="player.character.name" width="20" height="20"/>
-                                    </button>
-                                </span>
+                            <span v-for="(stock, stockIndex) in stocksToArray(playingMatch.match.stocks - player.data.stocks)"
+                                  class=""
+                            >
+                                <button class="btn btn-light" value="Stock" v-on:click="placeBookmark(playingMatch, player.id, stockIndex + 1)">
+                                    <img v-bind:src=mapCharacterStockIcon(player.character.name)
+                                         v-bind:title="player.character.name + ' - ' + player.data.stocks"
+                                         v-bind:alt="player.character.name" width="20" height="20"/>
+                                </button>
+                            </span>
                             </template>
                             <span class="btn btn-light" v-on:click="playerSeekTimeStamp(getMatchBookMark(playingMatch)['end'])">
-                                <font-awesome-icon icon="hourglass-end"></font-awesome-icon>
-                            </span>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="horizontal-line"></div>
-                        <div class="time-line">
-                            <span class="btn btn-light time-line-bookmark time-line-begin" v-on:click="playerSeekTimeStamp(getMatchBookMark(playingMatch)['begin'])">
-                                <font-awesome-icon icon="hourglass-start"></font-awesome-icon>
-                            </span>
-                                <template v-for="(player, index) in playingMatch.players">
-                                <span v-for="(stock, stockIndex) in stocksToArray(playingMatch.match.stocks - player.data.stocks)"
-                                      class="time-line-bookmark"
-                                      v-bind:style="timeLineBookmark(playingMatch, player.id, stockIndex + 1)"
-                                >
-                                    <button class="btn btn-light" value="Stock" v-on:click="playerSeekTimeStamp(seekStockTimeStamp(playingMatch, player, stockIndex + 1))">
-                                        <img v-bind:src=mapCharacterStockIcon(player.character.name)
-                                             v-bind:title="player.character.name + ' - ' + player.data.stocks"
-                                             v-bind:alt="player.character.name" width="20" height="20"/>
-                                    </button>
-                                </span>
-                                </template>
-                                <span class="btn btn-light time-line-bookmark time-line-end" v-on:click="playerSeekTimeStamp(getMatchBookMark(playingMatch)['end'])">
-                                <font-awesome-icon icon="hourglass-end"></font-awesome-icon>
-                            </span>
-                        </div>
-                    </td>
-                </tr>
-            </table>
+                            <font-awesome-icon icon="hourglass-end"></font-awesome-icon>
+                        </span>
+                    </div>
+                </div>
+                <div class="time-line">
+                    <span class="btn btn-light time-line-bookmark time-line-begin" v-on:click="playerSeekTimeStamp(getMatchBookMark(playingMatch)['begin'])">
+                        <font-awesome-icon icon="hourglass-start"></font-awesome-icon>
+                    </span>
+                        <template v-for="(player, index) in playingMatch.players">
+                        <span v-for="(stock, stockIndex) in stocksToArray(playingMatch.match.stocks - player.data.stocks)"
+                              class="time-line-bookmark"
+                              v-bind:style="timeLineBookmark(playingMatch, player.id, stockIndex + 1)"
+                        >
+                            <button class="btn btn-light" value="Stock" v-on:click="playerSeekTimeStamp(seekStockTimeStamp(playingMatch, player, stockIndex + 1))">
+                                <img v-bind:src=mapCharacterStockIcon(player.character.name)
+                                     v-bind:title="player.character.name + ' - ' + player.data.stocks"
+                                     v-bind:alt="player.character.name" width="20" height="20"/>
+                            </button>
+                        </span>
+                        </template>
+                        <span class="btn btn-light time-line-bookmark time-line-end" v-on:click="playerSeekTimeStamp(getMatchBookMark(playingMatch)['end'])">
+                        <font-awesome-icon icon="hourglass-end"></font-awesome-icon>
+                    </span>
+                </div>
+            </div>
         </modal>
         <h3>Leaderboard</h3>
         <table class="table">
@@ -417,7 +410,8 @@
       },
       timeLineBookmark: function(playingMatch, playerId, stockIndex) {
         let timeStamp = this.getMatchBookMark(playingMatch)[playerId][stockIndex];
-        let width = timeStamp * (800 / 500);
+
+        let width = timeStamp * (1000 / 500);
 
         return {
           'left': width + 'px',
@@ -432,7 +426,8 @@
         showCharacters: false,
         video: '288585781',
         playingMatch: {},
-        player: {}
+        player: {},
+        playerWidth: 0
       }
     },
     computed: {
@@ -504,6 +499,18 @@
     .stock-lost {
         opacity: 0.25;
     }
+    .replay-container {
+        width: 100%;
+        margin: 0 auto;
+    }
+    .time-line-bookmarks {
+        width: 100%;
+        margin: 0 auto;
+    }
+    .time-line-bookmark-control {
+        display: table;
+        margin: 0 auto;
+    }
     .time-line-bookmark {
         position: absolute;
     }
@@ -511,6 +518,19 @@
         left: 0;
     }
     .time-line-end {
-        left: 800px;
+        right: 0px;
+    }
+    .time-line {
+        position: relative;
+    }
+    .time-line::before {
+        content: '';
+        display: block;
+        height: 1px;
+        background-color: #000;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 20px;
     }
 </style>

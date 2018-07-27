@@ -45,7 +45,7 @@
               width: this.width,
               height: this.height
             };
-
+console.log(options);
             if (this.playsInline) {
               options.playsinline = true;
             }
