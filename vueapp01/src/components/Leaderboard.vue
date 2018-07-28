@@ -15,7 +15,29 @@
                 </div>
                 <div class="time-line-bookmarks">
                     <div class="time-line-bookmark-control">
-                        <span class="btn btn-light" v-on:click="placeGlobalBookmark(playingMatch, 'begin')">
+                        <bookmark-button v-bind:bookmark-name="'begin'" v-on:bookmark-click="placeGlobalBookmark">
+                            <font-awesome-icon icon="hourglass-start"></font-awesome-icon>
+                        </bookmark-button>
+
+                        <template v-for="(player, index) in playingMatch.players">
+                            <template v-for="(stock, stockIndex) in stocksToArray(playingMatch.match.stocks - player.data.stocks)">
+                                <bookmark-button
+                                    v-bind:bookmark-name="'player'"
+                                    v-bind:player-id="player.id"
+                                    v-bind:stock-number="stockIndex + 1"
+                                    v-on:bookmark-click="placeGlobalBookmark"
+                                >
+                                    <img v-bind:src=mapCharacterStockIcon(player.character.name)
+                                         v-bind:title="player.character.name + ' - ' + player.data.stocks"
+                                         v-bind:alt="player.character.name" width="20" height="20"/>
+                                </bookmark-button>
+                            </template>
+                        </template>
+
+                        <bookmark-button v-bind:bookmark-name="'end'" v-on:bookmark-click="placeGlobalBookmark">
+                            <font-awesome-icon icon="hourglass-end"></font-awesome-icon>
+                        </bookmark-button>
+<!--                        <span class="btn btn-light" v-on:click="placeGlobalBookmark(playingMatch, 'begin')">
                             <font-awesome-icon icon="hourglass-start"></font-awesome-icon>
                         </span>
 
@@ -31,9 +53,9 @@
                         </span>
                         </template>
 
-                        <span class="btn btn-light" v-on:click="placeGlobalBookmark(playingMatch, 'begin')">
+                        <span class="btn btn-light" v-on:click="placeGlobalBookmark(playingMatch, 'end')">
                             <font-awesome-icon icon="hourglass-end"></font-awesome-icon>
-                        </span>
+                        </span>-->
                     </div>
                 </div>
                 <div class="time-line">
@@ -58,6 +80,7 @@
                     </template>
 
                     <span class="btn btn-light time-line-bookmark time-line-end"
+                          v-on:update-global-bookmark="updateBookMarkTimestamp"
                           v-on:click="playerSeekTimeStamp(getMatchBookMark(playingMatch)['end'])"
                     >
                         <font-awesome-icon icon="hourglass-end"></font-awesome-icon>
@@ -168,6 +191,7 @@
   import axios from 'axios';
   import moment from 'moment';
   import VueTwitchPlayer from './TwitchPlayer.vue';
+  import BookmarkButton from "./BookmarkButton.vue";
 
   let calculatePlayerStats = function (self) {
     let matches = self.matches;
@@ -254,6 +278,7 @@
   export default {
     name: 'leaderboard',
     components: {
+      BookmarkButton,
       'twitch-player': VueTwitchPlayer
     },
     filters: {
@@ -383,15 +408,19 @@
 
         return bookmarks[match.match.id];
       },
-      placeGlobalBookmark: function(match, key) {
-        let bookmark = this.getMatchBookMark(match);
+      updateBookMarkTimestamp: function(event) {
+        console.log(event);
+      },
+      placeGlobalBookmark: function(event) {
+        console.log(event);
+/*        let bookmark = this.getMatchBookMark(match);
         let bookmarks = this.getBookMarks();
 
         bookmark[key] = self.videoPlayer.getCurrentTime();
 
         bookmarks[match.match.id] = bookmark;
 
-        localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+        localStorage.setItem('bookmarks', JSON.stringify(bookmarks));*/
       },
       placeBookmark: function(match, playerId, stockIndex) {
         if (!match) {
@@ -409,6 +438,8 @@
 
         bookmarks[match.match.id] = bookmark;
         localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+
+        //this.bookmarks[match.match.id][playerId][stockIndex +1] = {'left': '100 px',};
       },
       seekStockTimeStamp: function(match, player, stockNumber) {
         let bookmark = this.getMatchBookMark(match);
@@ -428,21 +459,25 @@
         this.playingMatch = event.params.match;
       },
       timeLineBookmark: function(playingMatch, playerId, stockIndex) {
+        this.bookmarks[playingMatch.match.id] = this.bookmarks[playingMatch.match.id] || {};
+        this.bookmarks[playingMatch.match.id][playerId] = this.bookmarks[playingMatch.match.id][playerId] || {};
+        this.bookmarks[playingMatch.match.id][playerId][stockIndex +1] = this.bookmarks[playingMatch.match.id][playerId][stockIndex +1] || {
+          'display': 'none',
+        };
+
         let matchBookMark = this.getMatchBookMark(playingMatch);
 
-        if (!matchBookMark[playerId] || !matchBookMark[playerId][stockIndex]) {
-          return {
-            'display': 'none',
+        if (matchBookMark[playerId] && matchBookMark[playerId][stockIndex]) {
+          let timeStamp = matchBookMark[playerId][stockIndex];
+
+          let width = timeStamp * (1000 / 500);
+
+          this.bookmarks[playingMatch.match.id][playerId][stockIndex +1] = {
+            'left': width + 'px',
           };
         }
 
-        let timeStamp = matchBookMark[playerId][stockIndex];
-
-        let width = timeStamp * (1000 / 500);
-
-        return {
-          'left': width + 'px',
-        };
+        return this.bookmarks[playingMatch.match.id][playerId][stockIndex +1];
       }
     },
     data: function () {
@@ -453,7 +488,8 @@
         video: '288585781',
         playingMatch: {},
         player: {},
-        playerWidth: 0
+        playerWidth: 0,
+        bookmarks: {},
       }
     },
     computed: {
