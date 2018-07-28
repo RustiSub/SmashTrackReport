@@ -5,8 +5,8 @@
                 <div class="replay-container">
                     <twitch-player
                             :video="video"
-                            width="1000"
-                            height="563"
+                            width="500"
+                            height="280"
                             ref="matchPlayer"
                             v-on:ready="playerReady"
                             v-on:playing="playerPlaying"
@@ -373,6 +373,16 @@
         localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
 
         return bookmarks[match.match.id];
+      },
+      placeGlobalBookmark: function(match, key) {
+        let bookmark = this.getMatchBookMark(match);
+        let bookmarks = this.getBookMarks();
+
+        bookmark[key] = self.videoPlayer.getCurrentTime();
+
+        bookmarks[match.match.id] = bookmark;
+
+        localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
       },
       placeBookmark: function(match, playerId, stockIndex) {
         if (!match) {
