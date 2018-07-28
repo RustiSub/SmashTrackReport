@@ -69,26 +69,25 @@
                         <table style="margin:auto; width:50%" class="table-borderless table-sm table-result">
                             <tr>
                                 <template v-for="(player, index) in match.players">
-                                    <td class="col-player">
+                                    <td class="col-player" style="vertical-align: middle">
                                         <span v-bind:class="{'font-weight-bold': player.is_winner}">
                                             {{ player.user.tag }}
                                         </span>
                                     </td>
-                                    <td class="col-stocks">
-                                        <span v-for="stock in stocksToArray(player.data.stocks)">
-                                                <img v-bind:class="{ 'stock-loser': !player.is_winner}"
-                                                     v-bind:src=mapCharacterStockIcon(player.character.name)
-                                                     v-bind:title="player.character.name + ' - ' + player.data.stocks"
-                                                     v-bind:alt="player.character.name" width="20" height="20"/>
-                                            </span>
-                                        <span v-if="player.data.stocks == 0">
-                                                <img v-bind:class="{ 'stock-loser': !player.is_winner}"
-                                                     v-bind:src=mapCharacterStockIcon(player.character.name)
-                                                     v-bind:title="player.character.name + ' - ' + player.data.stocks"
-                                                     v-bind:alt="player.character.name" width="20" height="20"/>
-                                            </span>
+                                    <td class="col-stocks" style="vertical-align: middle">
+                                        <span v-for="(stock, stockIndex) in stocksToArray(match.match.stocks)">
+                                            <img v-bind:class="{ 'stock-lost': player.data.stocks <= stockIndex}"
+                                                 v-bind:src=mapCharacterStockIcon(player.character.name)
+                                                 v-bind:title="player.character.name + ' - ' + player.data.stocks"
+                                                 v-bind:alt="player.character.name" width="20" height="20"/>
+                                        </span>
                                     </td>
-                                    <td class="col-vs" v-if="index != match.players.length - 1"> vs </td>
+                                    <td class="col-vs" v-if="index != match.players.length - 1" style="vertical-align: middle"> vs </td>
+                                    <td class="col-vs" v-if="index == match.players.length - 1" style="vertical-align: middle">
+                                        <button v-on:click="show(match)" title="Watch VOD" class="btn btn-light">
+                                            <font-awesome-icon icon="eye"></font-awesome-icon>
+                                        </button>
+                                    </td>
                                 </template>
                             </tr>
                         </table>
@@ -202,7 +201,11 @@
         return (number / total).toFixed(3);
       },
       mapCharacterStockIcon: function (characterName) {
-        return require("../assets/characters/" + characterName.toLowerCase().trim().replace(/\s/g, "").replace(".", "") + ".png");
+        try {
+          return require("../assets/characters/" + characterName.toLowerCase().trim().replace(/\s/g, "").replace(".", "") + ".png");
+        } catch (e) {
+          return '';
+        }
       },
       stocksToArray: function(numberOfStocks) {
         var stocks = [];
@@ -289,7 +292,7 @@
           self.users = usersResponse.data.data;
         });
 
-        self.$http.get('https://smashtrack.benn0.be/matches', {
+        self.$http.get('https://smashtrack.benn0.be/matches?pageSize=1000', {
           headers: {
             'Content-type': 'application/json',
           },
@@ -320,5 +323,8 @@
     }
     .stock-loser {
         opacity: 0.5;
+    }
+    .stock-lost {
+        opacity: 0.25;
     }
 </style>
