@@ -15,7 +15,9 @@
                 </div>
                 <div class="time-line-bookmarks">
                     <div class="time-line-bookmark-control">
-                        <bookmark-button v-bind:bookmark-name="'begin'" v-on:bookmark-click="placeGlobalBookmark">
+                        <bookmark-button v-bind:bookmark-name="'begin'"
+                                         v-bind:match="playingMatch.match"
+                                         v-on:bookmark-click="placeGlobalBookmark" >
                             <font-awesome-icon icon="hourglass-start"></font-awesome-icon>
                         </bookmark-button>
 
@@ -23,6 +25,7 @@
                             <template v-for="(stock, stockIndex) in stocksToArray(playingMatch.match.stocks - player.data.stocks)">
                                 <bookmark-button
                                     v-bind:bookmark-name="'player'"
+                                    v-bind:match="playingMatch.match"
                                     v-bind:player-id="player.id"
                                     v-bind:stock-number="stockIndex + 1"
                                     v-on:bookmark-click="placeGlobalBookmark"
@@ -34,7 +37,11 @@
                             </template>
                         </template>
 
-                        <bookmark-button v-bind:bookmark-name="'end'" v-on:bookmark-click="placeGlobalBookmark">
+                        <bookmark-button
+                                v-bind:bookmark-name="'end'"
+                                v-bind:match="playingMatch.match"
+                                v-on:bookmark-click="placeGlobalBookmark"
+                        >
                             <font-awesome-icon icon="hourglass-end"></font-awesome-icon>
                         </bookmark-button>
 <!--                        <span class="btn btn-light" v-on:click="placeGlobalBookmark(playingMatch, 'begin')">
@@ -59,7 +66,7 @@
                     </div>
                 </div>
                 <div class="time-line">
-                    <span class="btn btn-light time-line-bookmark time-line-begin"
+<!--                    <span class="btn btn-light time-line-bookmark time-line-begin"
                           v-on:click="playerSeekTimeStamp(getMatchBookMark(playingMatch)['begin'])"
                     >
                         <font-awesome-icon icon="hourglass-start"></font-awesome-icon>
@@ -84,7 +91,7 @@
                           v-on:click="playerSeekTimeStamp(getMatchBookMark(playingMatch)['end'])"
                     >
                         <font-awesome-icon icon="hourglass-end"></font-awesome-icon>
-                    </span>
+                    </span>-->
                 </div>
             </div>
         </modal>
@@ -396,33 +403,43 @@
       getBookMarks: function() {
         return JSON.parse(localStorage.getItem('bookmarks')) || {};
       },
-      getMatchBookMark: function(match) {
+      getMatchBookMark: function(matchId) {
         let bookmarks = this.getBookMarks();
 
-        bookmarks[match.match.id] = bookmarks[match.match.id] || {
-          'begin': 0,
-          'end': 0
-        };
+        bookmarks[matchId] = bookmarks[matchId] || {};
 
         localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
 
-        return bookmarks[match.match.id];
+        return bookmarks[matchId];
       },
       updateBookMarkTimestamp: function(event) {
-        console.log(event);
       },
       placeGlobalBookmark: function(event) {
-        console.log(event);
-/*        let bookmark = this.getMatchBookMark(match);
+        let timestamp = self.videoPlayer.getCurrentTime();
+        let name = event.name;
+        let matchId = event.matchId;
+        let playerId = event.playerId;
+        let stockNumber = event.stockNumber;
+        let bookmark = this.getMatchBookMark(matchId);
         let bookmarks = this.getBookMarks();
 
-        bookmark[key] = self.videoPlayer.getCurrentTime();
+        if (!playerId){
+          bookmark[name] = timestamp;
+        } else if (!stockNumber) {
+          bookmark[name] = bookmark[name] || {};
+          bookmark[name][playerId] = timestamp;
+        } else {
+          bookmark[name] = bookmark[name] || {};
+          bookmark[name][playerId] = bookmark[name][playerId]  || {};
+          bookmark[name][playerId][stockNumber] = timestamp;
+        }
 
-        bookmarks[match.match.id] = bookmark;
+        bookmarks[matchId] = bookmark;
 
-        localStorage.setItem('bookmarks', JSON.stringify(bookmarks));*/
+        localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
       },
       placeBookmark: function(match, playerId, stockIndex) {
+        console.log('3');
         if (!match) {
           return;
         }

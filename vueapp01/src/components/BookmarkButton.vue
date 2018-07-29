@@ -8,6 +8,7 @@
     name: 'bookmarkButton',
     props: {
       bookmarkName: String,
+      match: Object,
       playerId: Number,
       stockNumber: Number
     },
@@ -15,6 +16,7 @@
       clickBookmark: function() {
         this.$emit('bookmark-click', {
           name: this.bookmarkName,
+          matchId: this.match.id,
           playerId: this.playerId,
           stockNumber: this.stockNumber
         });
