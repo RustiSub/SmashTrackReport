@@ -44,55 +44,40 @@
                         >
                             <font-awesome-icon icon="hourglass-end"></font-awesome-icon>
                         </bookmark-button>
-<!--                        <span class="btn btn-light" v-on:click="placeGlobalBookmark(playingMatch, 'begin')">
-                            <font-awesome-icon icon="hourglass-start"></font-awesome-icon>
-                        </span>
-
-                        <template v-for="(player, index) in playingMatch.players">
-                        <span v-for="(stock, stockIndex) in stocksToArray(playingMatch.match.stocks - player.data.stocks)"
-                              class=""
-                        >
-                            <button class="btn btn-light" value="Stock" v-on:click="placeBookmark(playingMatch, player.id, stockIndex + 1)">
-                                <img v-bind:src=mapCharacterStockIcon(player.character.name)
-                                     v-bind:title="player.character.name + ' - ' + player.data.stocks"
-                                     v-bind:alt="player.character.name" width="20" height="20"/>
-                            </button>
-                        </span>
-                        </template>
-
-                        <span class="btn btn-light" v-on:click="placeGlobalBookmark(playingMatch, 'end')">
-                            <font-awesome-icon icon="hourglass-end"></font-awesome-icon>
-                        </span>-->
                     </div>
                 </div>
-                <div class="time-line">
-<!--                    <span class="btn btn-light time-line-bookmark time-line-begin"
-                          v-on:click="playerSeekTimeStamp(getMatchBookMark(playingMatch)['begin'])"
-                    >
-                        <font-awesome-icon icon="hourglass-start"></font-awesome-icon>
-                    </span>
+                <time-line v-bind:match="bookmarks">
 
-                    <template v-for="(player, index) in playingMatch.players">
-                    <span v-for="(stock, stockIndex) in stocksToArray(playingMatch.match.stocks - player.data.stocks)"
-                          class="time-line-bookmark"
-                          v-bind:style="timeLineBookmark(playingMatch, player.id, stockIndex + 1)"
+                </time-line>
+                <!--
+                                <div class="time-line">
+                                    <span class="btn btn-light time-line-bookmark time-line-begin"
+                                          v-on:click="playerSeekTimeStamp(getMatchBookMark(playingMatch)['begin'])"
+                                    >
+                                        c
+                                    </span>
 
-                    >
-                        <button class="btn btn-light" value="Stock" v-on:click="playerSeekTimeStamp(seekStockTimeStamp(playingMatch, player, stockIndex + 1))">
-                            <img v-bind:src=mapCharacterStockIcon(player.character.name)
-                                 v-bind:title="player.character.name + ' - ' + player.data.stocks"
-                                 v-bind:alt="player.character.name" width="20" height="20"/>
-                        </button>
-                    </span>
-                    </template>
+                                    <template v-for="(player, index) in playingMatch.players">
+                                    <span v-for="(stock, stockIndex) in stocksToArray(playingMatch.match.stocks - player.data.stocks)"
+                                          class="time-line-bookmark"
+                                          v-bind:style="timeLineBookmark(playingMatch, player.id, stockIndex + 1)"
 
-                    <span class="btn btn-light time-line-bookmark time-line-end"
-                          v-on:update-global-bookmark="updateBookMarkTimestamp"
-                          v-on:click="playerSeekTimeStamp(getMatchBookMark(playingMatch)['end'])"
-                    >
-                        <font-awesome-icon icon="hourglass-end"></font-awesome-icon>
-                    </span>-->
-                </div>
+                                    >
+                                        <button class="btn btn-light" value="Stock" v-on:click="playerSeekTimeStamp(seekStockTimeStamp(playingMatch, player, stockIndex + 1))">
+                                            <img v-bind:src=mapCharacterStockIcon(player.character.name)
+                                                 v-bind:title="player.character.name + ' - ' + player.data.stocks"
+                                                 v-bind:alt="player.character.name" width="20" height="20"/>
+                                        </button>
+                                    </span>
+                                    </template>
+
+                                    <span class="btn btn-light time-line-bookmark time-line-end"
+                                          v-on:update-global-bookmark="updateBookMarkTimestamp"
+                                          v-on:click="playerSeekTimeStamp(getMatchBookMark(playingMatch)['end'])"
+                                    >
+                                        <font-awesome-icon icon="hourglass-end"></font-awesome-icon>
+                                    </span>
+                                </div>-->
             </div>
         </modal>
         <h3>Leaderboard</h3>
@@ -199,6 +184,8 @@
   import moment from 'moment';
   import VueTwitchPlayer from './TwitchPlayer.vue';
   import BookmarkButton from "./BookmarkButton.vue";
+  import TimeLineBookmarkButton from "./TimeLineBookmarkButton.vue";
+  import TimeLine from "./TimeLine.vue";
 
   let calculatePlayerStats = function (self) {
     let matches = self.matches;
@@ -285,6 +272,8 @@
   export default {
     name: 'leaderboard',
     components: {
+      TimeLine,
+      TimeLineBookmarkButton,
       BookmarkButton,
       'twitch-player': VueTwitchPlayer
     },
@@ -407,6 +396,8 @@
         let bookmarks = this.getBookMarks();
 
         bookmarks[matchId] = bookmarks[matchId] || {};
+        bookmarks[matchId]['begin'] = bookmarks[matchId]['begin'] || 0;
+        bookmarks[matchId]['end'] = bookmarks[matchId]['end'] || 0;
 
         localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
 
@@ -474,6 +465,7 @@
       },
       beforeOpen(event) {
         this.playingMatch = event.params.match;
+        this.bookmarks = this.getMatchBookMark(this.playingMatch.match.id);
       },
       timeLineBookmark: function(playingMatch, playerId, stockIndex) {
         this.bookmarks[playingMatch.match.id] = this.bookmarks[playingMatch.match.id] || {};
