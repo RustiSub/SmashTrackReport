@@ -46,7 +46,9 @@
                         </bookmark-button>
                     </div>
                 </div>
-                <time-line v-bind:match="bookmarks">
+                <time-line v-bind:match="playingMatch"
+                           v-bind:bookmarks="bookmarks"
+                           v-on:time-line-bookmark-click="seekBookmark">
 
                 </time-line>
                 <!--
@@ -147,7 +149,7 @@
                     <td style="vertical-align: middle">
                         <table style="margin:auto; width:50%" class="table-borderless table-sm table-result">
                             <tr>
-                                <template v-for="(player, index) in match.players">
+                                <template v-for="(player, key, index) in match.players">
                                     <td class="col-player" style="vertical-align: middle">
                                         <span v-bind:class="{'font-weight-bold': player.is_winner}">
                                             {{ player.user.tag }}
@@ -161,13 +163,13 @@
                                                  v-bind:alt="player.character.name" width="20" height="20"/>
                                         </span>
                                     </td>
-                                    <td class="col-vs" v-if="index != match.players.length - 1" style="vertical-align: middle"> vs </td>
-                                    <td class="col-vs" v-if="index == match.players.length - 1" style="vertical-align: middle">
-                                        <button v-on:click="show(match)" title="Watch VOD" class="btn btn-light">
-                                            <font-awesome-icon icon="eye"></font-awesome-icon>
-                                        </button>
-                                    </td>
+                                    <td class="col-vs" v-if="index != playerCount(match.players) - 1" style="vertical-align: middle"> vs </td>
                                 </template>
+                                <td class="col-vs" style="vertical-align: middle">
+                                    <button v-on:click="show(match)" title="Watch VOD" class="btn btn-light">
+                                        <font-awesome-icon icon="eye"></font-awesome-icon>
+                                    </button>
+                                </td>
                             </tr>
                         </table>
                     </td>
@@ -190,6 +192,16 @@
   let calculatePlayerStats = function (self) {
     let matches = self.matches;
     let users = self.users;
+
+    Array.from(matches).forEach(function(match) {
+      let players = {};
+
+      Array.from(match.players).forEach(function(player) {
+        players[player.id] = player;
+      });
+
+      match.players = players;
+    });
 
     Array.from(users).forEach(function (user) {
       user.games = 0;
@@ -294,6 +306,9 @@
       mapCharacterStockIcon: function (characterName) {
         return require("../assets/characters/" + characterName.toLowerCase().trim().replace(/\s/g, "").replace(".", "") + ".png");
       },
+      playerCount: function(players) {
+        return Object.keys(players).length;
+      },
       stocksToArray: function(numberOfStocks) {
         var stocks = [];
 
@@ -389,21 +404,16 @@
       playerSeekTimeStamp: function(timeStamp) {
         self.videoPlayer.seek(timeStamp);
       },
-      getBookMarks: function() {
-        return JSON.parse(localStorage.getItem('bookmarks')) || {};
+      initBookMarks: function() {
+        this.bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || {};
+        localStorage.setItem('bookmarks', JSON.stringify(this.bookmarks));
+
+        return this.bookmarks;
       },
-      getMatchBookMark: function(matchId) {
-        let bookmarks = this.getBookMarks();
+      seekBookmark: function(event) {
+        self.videoPlayer.seek(this.bookmarks[event.matchId][event.name]);
 
-        bookmarks[matchId] = bookmarks[matchId] || {};
-        bookmarks[matchId]['begin'] = bookmarks[matchId]['begin'] || 0;
-        bookmarks[matchId]['end'] = bookmarks[matchId]['end'] || 0;
-
-        localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
-
-        return bookmarks[matchId];
-      },
-      updateBookMarkTimestamp: function(event) {
+        console.log(this.bookmarks);
       },
       placeGlobalBookmark: function(event) {
         let timestamp = self.videoPlayer.getCurrentTime();
@@ -411,51 +421,27 @@
         let matchId = event.matchId;
         let playerId = event.playerId;
         let stockNumber = event.stockNumber;
-        let bookmark = this.getMatchBookMark(matchId);
-        let bookmarks = this.getBookMarks();
+
+        this.bookmarks[matchId] = this.bookmarks[matchId] || {};
 
         if (!playerId){
-          bookmark[name] = timestamp;
+          this.bookmarks[matchId][name] = timestamp;
         } else if (!stockNumber) {
-          bookmark[name] = bookmark[name] || {};
-          bookmark[name][playerId] = timestamp;
+          this.bookmarks[matchId][name] = this.bookmarks[matchId][name] || {};
+          this.bookmarks[matchId][name][playerId] = timestamp;
         } else {
-          bookmark[name] = bookmark[name] || {};
-          bookmark[name][playerId] = bookmark[name][playerId]  || {};
-          bookmark[name][playerId][stockNumber] = timestamp;
+          this.bookmarks[matchId][name] = this.bookmarks[matchId][name] || {};
+          this.bookmarks[matchId][name][playerId] = this.bookmarks[matchId][name][playerId]  || {};
+          this.bookmarks[matchId][name][playerId][stockNumber] = timestamp;
         }
 
-        bookmarks[matchId] = bookmark;
-
-        localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
-      },
-      placeBookmark: function(match, playerId, stockIndex) {
-        console.log('3');
-        if (!match) {
-          return;
-        }
-
-        let bookmark = this.getMatchBookMark(match);
-        let bookmarks = this.getBookMarks();
-
-        if (!playerId || !stockIndex) {
-          return;
-        }
-
-        bookmark[playerId][stockIndex] = self.videoPlayer.getCurrentTime();
-
-        bookmarks[match.match.id] = bookmark;
-        localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
-
-        //this.bookmarks[match.match.id][playerId][stockIndex +1] = {'left': '100 px',};
+        localStorage.setItem('bookmarks', JSON.stringify(this.bookmarks));
       },
       seekStockTimeStamp: function(match, player, stockNumber) {
-        let bookmark = this.getMatchBookMark(match);
+        this.bookmarks[match.match.id][player.id] = this.bookmarks[match.match.id][player.id] || {};
+        this.bookmarks[match.match.id][player.id][stockNumber] = this.bookmarks[match.match.id][player.id][stockNumber] || 0;
 
-        bookmark[player.id] = bookmark[player.id] || {};
-        bookmark[player.id][stockNumber] = bookmark[player.id][stockNumber] || 0;
-
-        return bookmark[player.id][stockNumber];
+        return this.bookmarks[match.match.id][player.id][stockNumber];
       },
       show (match, stockIndex) {
         this.$modal.show('modal-match-player', {match: match});
@@ -465,28 +451,6 @@
       },
       beforeOpen(event) {
         this.playingMatch = event.params.match;
-        this.bookmarks = this.getMatchBookMark(this.playingMatch.match.id);
-      },
-      timeLineBookmark: function(playingMatch, playerId, stockIndex) {
-        this.bookmarks[playingMatch.match.id] = this.bookmarks[playingMatch.match.id] || {};
-        this.bookmarks[playingMatch.match.id][playerId] = this.bookmarks[playingMatch.match.id][playerId] || {};
-        this.bookmarks[playingMatch.match.id][playerId][stockIndex +1] = this.bookmarks[playingMatch.match.id][playerId][stockIndex +1] || {
-          'display': 'none',
-        };
-
-        let matchBookMark = this.getMatchBookMark(playingMatch);
-
-        if (matchBookMark[playerId] && matchBookMark[playerId][stockIndex]) {
-          let timeStamp = matchBookMark[playerId][stockIndex];
-
-          let width = timeStamp * (1000 / 500);
-
-          this.bookmarks[playingMatch.match.id][playerId][stockIndex +1] = {
-            'left': width + 'px',
-          };
-        }
-
-        return this.bookmarks[playingMatch.match.id][playerId][stockIndex +1];
       }
     },
     data: function () {
@@ -516,6 +480,8 @@
     },
     mounted() {
       let self = this;
+
+      this.initBookMarks();
 
       self.$http.post('https://smashtrack.benn0.be/login', {
         tag: 'WPIT',
@@ -581,27 +547,5 @@
     .time-line-bookmark-control {
         display: table;
         margin: 0 auto;
-    }
-    .time-line-bookmark {
-        position: absolute;
-    }
-    .time-line-begin {
-        left: 0;
-    }
-    .time-line-end {
-        right: 0px;
-    }
-    .time-line {
-        position: relative;
-    }
-    .time-line::before {
-        content: '';
-        display: block;
-        height: 1px;
-        background-color: #000;
-        position: absolute;
-        left: 0;
-        right: 0;
-        top: 20px;
     }
 </style>
