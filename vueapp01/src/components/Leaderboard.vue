@@ -410,10 +410,17 @@
 
         return this.bookmarks;
       },
-      seekBookmark: function(event) {
-        self.videoPlayer.seek(this.bookmarks[event.matchId][event.name]);
+      initMatchBookMarks: function(matchId, players) {
+        this.bookmarks[matchId] = this.bookmarks[matchId] || {};
 
-        console.log(this.bookmarks);
+        this.bookmarks[matchId]['begin'] = this.bookmarks[matchId]['begin'] || 0;
+        this.bookmarks[matchId]['end'] = this.bookmarks[matchId]['end'] || 0;
+        this.bookmarks[matchId]['player'] = this.bookmarks[matchId]['player'] || {};
+
+        localStorage.setItem('bookmarks', JSON.stringify(this.bookmarks));
+      },
+      seekBookmark: function(event) {
+        self.videoPlayer.seek(event.timestamp);
       },
       placeGlobalBookmark: function(event) {
         let timestamp = self.videoPlayer.getCurrentTime();
@@ -432,7 +439,9 @@
         } else {
           this.bookmarks[matchId][name] = this.bookmarks[matchId][name] || {};
           this.bookmarks[matchId][name][playerId] = this.bookmarks[matchId][name][playerId]  || {};
-          this.bookmarks[matchId][name][playerId][stockNumber] = timestamp;
+          this.bookmarks[matchId][name][playerId][stockNumber] = {
+            timestamp: timestamp
+          };
         }
 
         localStorage.setItem('bookmarks', JSON.stringify(this.bookmarks));
@@ -451,6 +460,8 @@
       },
       beforeOpen(event) {
         this.playingMatch = event.params.match;
+
+        this.initMatchBookMarks(this.playingMatch.match.id, this.playingMatch.players);
       }
     },
     data: function () {

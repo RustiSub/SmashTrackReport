@@ -1,15 +1,16 @@
 <template>
     <div class="time-line">
-        <span class="btn btn-light time-line-bookmark time-line-begin" v-on:click="clickTimeLineBookmark('begin')">
+        <span class="btn btn-light time-line-bookmark time-line-begin" v-on:click="clickTimeLineBookmark(bookmarks[match.match.id]['begin'])">
             <font-awesome-icon icon="hourglass-start"></font-awesome-icon>
         </span>
 
         <template v-for="(bookmark, bookmarkIndex) in bookmarks[match.match.id]['player']">
-            <template v-for="(playerBookmark, playerBookmarkIndex) in bookmark">
+            <template v-for="(playerBookmark, key) in bookmark">
                 <time-line-bookmark-button
-                    :timeStamp="playerBookmark"
+                    :bookMark="playerBookmark"
                     :begin="bookmarks[match.match.id]['begin']"
                     :end="bookmarks[match.match.id]['end']"
+                    v-on:time-line-bookmark-click="clickTimeLineBookmark(playerBookmark['timestamp'])"
                 >
                     <img v-bind:src=mapCharacterStockIcon(match.players[bookmarkIndex].character.name)
                          v-bind:title="match.players[bookmarkIndex].character.name"
@@ -17,19 +18,9 @@
                     />
                 </time-line-bookmark-button>
             </template>
-            <!--<span v-for="(stock, stockIndex) in stocksToArray(match.match.stocks - player.data.stocks)"-->
-                  <!--class="time-line-bookmark"-->
-                  <!--v-bind:style="timeLineBookmark(match, player.id, stockIndex + 1)"-->
-            <!--&gt;-->
-                <!--<button class="btn btn-light" value="Stock" v-on:click="playerSeekTimeStamp(seekStockTimeStamp(match, player, stockIndex + 1))">-->
-                    <!--<img v-bind:src=mapCharacterStockIcon(player.character.name)-->
-                         <!--v-bind:title="player.character.name + ' - ' + player.data.stocks"-->
-                         <!--v-bind:alt="player.character.name" width="20" height="20"/>-->
-                <!--</button>-->
-            <!--</span>-->
         </template>
 
-        <span class="btn btn-light time-line-bookmark time-line-end" v-on:click="clickTimeLineBookmark('end')">
+        <span class="btn btn-light time-line-bookmark time-line-end" v-on:click="clickTimeLineBookmark(bookmarks[match.match.id]['end'])">
             <font-awesome-icon icon="hourglass-end"></font-awesome-icon>
         </span>
     </div>
@@ -54,10 +45,9 @@
       mapCharacterStockIcon: function (characterName) {
         return require("../assets/characters/" + characterName.toLowerCase().trim().replace(/\s/g, "").replace(".", "") + ".png");
       },
-      clickTimeLineBookmark: function(name) {
+      clickTimeLineBookmark: function(timeStamp) {
         this.$emit('time-line-bookmark-click', {
-          name: name,
-          matchId: this.match.match.id
+          timeStamp: timeStamp
         });
       }
     }
@@ -67,6 +57,7 @@
 <style scoped>
     .time-line-bookmark {
         position: absolute;
+        opacity: 0.90;
     }
     .time-line-begin {
         left: 0;
@@ -85,6 +76,6 @@
         position: absolute;
         left: 0;
         right: 0;
-        top: 20px;
+        top: 18px;
     }
 </style>
