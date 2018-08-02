@@ -187,54 +187,63 @@
       user.characters = {};
 
       Array.from(matches).forEach(function (matchData) {
-        Array.from(matchData.players).forEach(function (player) {
-          if (player.user.id === user.id) {
-            user.matchesPlayed.push(matchData);
+        for (var playerIndex in matchData.players) {
+          if (matchData.players.hasOwnProperty(playerIndex)) {
+            let player = matchData.players[playerIndex];
+            if (player.user.id === user.id) {
+              user.matchesPlayed.push(matchData);
 
-            if (!user.characters[player.character.name]) {
-              user.characters[player.character.name] = player.character;
+              if (!user.characters[player.character.name]) {
+                user.characters[player.character.name] = player.character;
+              }
+
+              let character = user.characters[player.character.name];
+
+              character.games = 0;
+              character.wins = 0;
+              character.losses = 0;
+              character.winRatio = 0;
+              character.stocksTaken = 0;
+              character.stocksTakenRatio = 0;
+              character.stocksLost = 0;
+              character.stocksLostRatio = 0;
             }
-
-            let character = user.characters[player.character.name];
-
-            character.games = 0;
-            character.wins = 0;
-            character.losses = 0;
-            character.winRatio = 0;
-            character.stocksTaken = 0;
-            character.stocksTakenRatio = 0;
-            character.stocksLost = 0;
-            character.stocksLostRatio = 0;
           }
-        });
+        }
       });
 
       Array.from(user.matchesPlayed).forEach(function (matchPlayedData) {
         let character;
         matchPlayedData.stocksTaken = 0;
-        Array.from(matchPlayedData.players).forEach(function (player) {
-          if (player.user.id === user.id) {
-            character = user.characters[player.character.name];
 
-            if (player.is_winner) {
-              user.wins += 1;
-              character.wins += 1;
+        for (var playerIndex in matchPlayedData.players) {
+          if (matchPlayedData.players.hasOwnProperty(playerIndex)) {
+            let player = matchPlayedData.players[playerIndex];
+
+            if (player.user.id === user.id) {
+              character = user.characters[player.character.name];
+
+              if (player.is_winner) {
+                user.wins += 1;
+                character.wins += 1;
+              } else {
+                user.losses += 1;
+                character.losses += 1;
+              }
+
+              user.games += 1;
+              character.games += 1;
+
+              user.stocksLost += matchPlayedData.match.stocks - player.data.stocks;
+              character.stocksLost += matchPlayedData.match.stocks - player.data.stocks;
             } else {
-              user.losses += 1;
-              character.losses += 1;
+              user.stocksTaken += matchPlayedData.match.stocks - player.data.stocks;
+
+              matchPlayedData.stocksTaken += matchPlayedData.match.stocks - player.data.stocks;
             }
-
-            user.games += 1;
-            character.games += 1;
-
-            user.stocksLost += matchPlayedData.match.stocks - player.data.stocks;
-            character.stocksLost += matchPlayedData.match.stocks - player.data.stocks;
-          } else {
-            user.stocksTaken += matchPlayedData.match.stocks - player.data.stocks;
-
-            matchPlayedData.stocksTaken += matchPlayedData.match.stocks - player.data.stocks;
           }
-        });
+        }
+
         character.stocksTaken += matchPlayedData.stocksTaken;
       });
 
