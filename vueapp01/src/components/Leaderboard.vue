@@ -129,6 +129,11 @@
                                         </span>
                                     </td>
                                     <td class="col-vs" v-if="index != playerCount(match.players) - 1" style="vertical-align: middle"> vs </td>
+                                    <td class="col-vs" v-if="index == match.players.length - 1" style="vertical-align: middle">
+                                        <button v-on:click="show(match)" title="Watch VOD" class="btn btn-light">
+                                            <font-awesome-icon icon="eye"></font-awesome-icon>
+                                        </button>
+                                    </td>
                                 </template>
                                 <td class="col-vs" style="vertical-align: middle">
                                     <button v-on:click="show(match)" title="Watch VOD" class="btn btn-light">
@@ -270,7 +275,11 @@
         return (number / total).toFixed(3);
       },
       mapCharacterStockIcon: function (characterName) {
-        return require("../assets/characters/" + characterName.toLowerCase().trim().replace(/\s/g, "").replace(".", "") + ".png");
+        try {
+          return require("../assets/characters/" + characterName.toLowerCase().trim().replace(/\s/g, "").replace(".", "") + ".png");
+        } catch (e) {
+          return '';
+        }
       },
       playerCount: function(players) {
         return Object.keys(players).length;
@@ -479,7 +488,7 @@
           self.users = usersResponse.data.data;
         });
 
-        self.$http.get('https://smashtrack.benn0.be/matches', {
+        self.$http.get('https://smashtrack.benn0.be/matches?pageSize=1000', {
           headers: {
             'Content-type': 'application/json',
           },
