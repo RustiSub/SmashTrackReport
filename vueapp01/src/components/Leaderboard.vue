@@ -2,16 +2,10 @@
     <div class="leaderboard">
         <modal name="modal-match-player" @before-open="beforeOpen" :width="1000" :height="720">
             <div id="replayPlayerWindow">
+                <span class="font-weight-bold">VideoId: </span>
+                <input v-model="videoId" placeholder="Youtube Video Id">
                 <div class="replay-container">
-                    <twitch-player
-                            :video="video"
-                            width="500"
-                            height="280"
-                            ref="matchPlayer"
-                            v-on:ready="playerReady"
-                            v-on:playing="playerPlaying"
-                    >
-                    </twitch-player>
+                    <youtube :video-id="videoId" @ready="playerReady"></youtube>
                 </div>
                 <div class="time-line-bookmarks">
                     <div class="time-line-bookmark-control">
@@ -51,35 +45,6 @@
                            v-on:time-line-bookmark-click="seekBookmark">
 
                 </time-line>
-                <!--
-                                <div class="time-line">
-                                    <span class="btn btn-light time-line-bookmark time-line-begin"
-                                          v-on:click="playerSeekTimeStamp(getMatchBookMark(playingMatch)['begin'])"
-                                    >
-                                        c
-                                    </span>
-
-                                    <template v-for="(player, index) in playingMatch.players">
-                                    <span v-for="(stock, stockIndex) in stocksToArray(playingMatch.match.stocks - player.data.stocks)"
-                                          class="time-line-bookmark"
-                                          v-bind:style="timeLineBookmark(playingMatch, player.id, stockIndex + 1)"
-
-                                    >
-                                        <button class="btn btn-light" value="Stock" v-on:click="playerSeekTimeStamp(seekStockTimeStamp(playingMatch, player, stockIndex + 1))">
-                                            <img v-bind:src=mapCharacterStockIcon(player.character.name)
-                                                 v-bind:title="player.character.name + ' - ' + player.data.stocks"
-                                                 v-bind:alt="player.character.name" width="20" height="20"/>
-                                        </button>
-                                    </span>
-                                    </template>
-
-                                    <span class="btn btn-light time-line-bookmark time-line-end"
-                                          v-on:update-global-bookmark="updateBookMarkTimestamp"
-                                          v-on:click="playerSeekTimeStamp(getMatchBookMark(playingMatch)['end'])"
-                                    >
-                                        <font-awesome-icon icon="hourglass-end"></font-awesome-icon>
-                                    </span>
-                                </div>-->
             </div>
         </modal>
         <h3>Leaderboard</h3>
@@ -287,7 +252,8 @@
       TimeLine,
       TimeLineBookmarkButton,
       BookmarkButton,
-      'twitch-player': VueTwitchPlayer
+      'twitch-player': VueTwitchPlayer,
+
     },
     filters: {
       formatDate: function (value) {
@@ -389,20 +355,8 @@
 
         return sortable.sort(compare);
       },
-      playerReady: function(videoPlayer) {
-        self.videoPlayer = videoPlayer;
-        self.videoPlayer.seekBookmarkPaused = false;
-      },
-      playerPlaying: function() {
-        if (!self.videoPlayer.seekBookmarkPaused) {
-          self.videoPlayer.pause();
-          self.videoPlayer.seek(0);
-
-          self.videoPlayer.seekBookmarkPaused = true;
-        }
-      },
-      playerSeekTimeStamp: function(timeStamp) {
-        self.videoPlayer.seek(timeStamp);
+      playerReady: function(event) {
+        self.videoPlayer = event.target;
       },
       initBookMarks: function() {
         this.bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || {};
@@ -413,14 +367,17 @@
       initMatchBookMarks: function(matchId, players) {
         this.bookmarks[matchId] = this.bookmarks[matchId] || {};
 
+        this.bookmarks[matchId]['videoId'] = this.bookmarks[matchId]['videoId'] || '';
         this.bookmarks[matchId]['begin'] = this.bookmarks[matchId]['begin'] || 0;
         this.bookmarks[matchId]['end'] = this.bookmarks[matchId]['end'] || 0;
         this.bookmarks[matchId]['player'] = this.bookmarks[matchId]['player'] || {};
 
         localStorage.setItem('bookmarks', JSON.stringify(this.bookmarks));
+
+        return this.bookmarks;
       },
       seekBookmark: function(event) {
-        self.videoPlayer.seek(event.timestamp);
+        self.videoPlayer.seekTo(event.timestamp);
       },
       placeGlobalBookmark: function(event) {
         let timestamp = self.videoPlayer.getCurrentTime();
@@ -446,14 +403,13 @@
 
         localStorage.setItem('bookmarks', JSON.stringify(this.bookmarks));
       },
-      seekStockTimeStamp: function(match, player, stockNumber) {
-        this.bookmarks[match.match.id][player.id] = this.bookmarks[match.match.id][player.id] || {};
-        this.bookmarks[match.match.id][player.id][stockNumber] = this.bookmarks[match.match.id][player.id][stockNumber] || 0;
-
-        return this.bookmarks[match.match.id][player.id][stockNumber];
-      },
       show (match, stockIndex) {
-        this.$modal.show('modal-match-player', {match: match});
+        this.$modal.show('modal-match-player',
+            {
+              match: match,
+              videoId: '',
+            }
+        );
       },
       hide () {
         this.$modal.hide('modal-match-player');
@@ -462,6 +418,9 @@
         this.playingMatch = event.params.match;
 
         this.initMatchBookMarks(this.playingMatch.match.id, this.playingMatch.players);
+
+        this.matchId = this.playingMatch.match.id;
+        this.videoId = this.bookmarks[this.playingMatch.match.id]['videoId'];
       }
     },
     data: function () {
@@ -469,11 +428,19 @@
         matches: [],
         users: [],
         showCharacters: false,
-        video: '288585781',
+        matchId: null,
+        videoId: '',
         playingMatch: {},
         player: {},
         playerWidth: 0,
         bookmarks: {},
+      }
+    },
+    watch: {
+      videoId: function() {
+        this.bookmarks[this.matchId]['videoId'] = this.videoId;
+
+        localStorage.setItem('bookmarks', JSON.stringify(this.bookmarks));
       }
     },
     computed: {

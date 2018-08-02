@@ -45,9 +45,9 @@
       mapCharacterStockIcon: function (characterName) {
         return require("../assets/characters/" + characterName.toLowerCase().trim().replace(/\s/g, "").replace(".", "") + ".png");
       },
-      clickTimeLineBookmark: function(timeStamp) {
+      clickTimeLineBookmark: function(timestamp) {
         this.$emit('time-line-bookmark-click', {
-          timeStamp: timeStamp
+          timestamp: timestamp
         });
       }
     }

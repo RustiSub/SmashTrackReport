@@ -11,12 +11,14 @@ import { faEye } from '@fortawesome/free-solid-svg-icons'
 import { faHourglassStart } from '@fortawesome/free-solid-svg-icons'
 import { faHourglassEnd } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import VueYouTubeEmbed from 'vue-youtube-embed'
 
 library.add(faEye);
 library.add(faHourglassStart);
 library.add(faHourglassEnd);
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 
+Vue.use(VueYouTubeEmbed);
 Vue.use(VModal);
 Vue.use(LoadScript);
 Vue.use(BootstrapVue);
