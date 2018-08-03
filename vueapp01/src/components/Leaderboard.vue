@@ -5,7 +5,7 @@
                 <span class="font-weight-bold">VideoId: </span>
                 <input v-model="videoId" placeholder="Youtube Video Id">
                 <div class="replay-container">
-                    <youtube :video-id="videoId" @ready="playerReady"></youtube>
+                    <youtube :video-id="videoId" :playerWidth="1000" :playerHeight="500" @ready="playerReady"></youtube>
                 </div>
                 <div class="time-line-bookmarks">
                     <div class="time-line-bookmark-control">
@@ -129,14 +129,11 @@
                                         </span>
                                     </td>
                                     <td class="col-vs" v-if="index != playerCount(match.players) - 1" style="vertical-align: middle"> vs </td>
-                                    <td class="col-vs" v-if="index == match.players.length - 1" style="vertical-align: middle">
-                                        <button v-on:click="show(match)" title="Watch VOD" class="btn btn-light">
-                                            <font-awesome-icon icon="eye"></font-awesome-icon>
-                                        </button>
-                                    </td>
                                 </template>
                                 <td class="col-vs" style="vertical-align: middle">
-                                    <button v-on:click="show(match)" title="Watch VOD" class="btn btn-light">
+                                    <button v-on:click="show(match)" title="Watch VOD" class="btn btn-light"
+                                        v-bind:class="{'no-video': !hasVideo(match.match.id)}"
+                                    >
                                         <font-awesome-icon icon="eye"></font-awesome-icon>
                                     </button>
                                 </td>
@@ -277,6 +274,14 @@
       }
     },
     methods: {
+      hasVideo: function(matchId) {
+        let video = this.bookmarks[matchId] || false;
+
+        video = video['videoId'] || false;
+        video = video && video !== '';
+
+        return video;
+      },
       toggleCharacters() {
         this.showCharacters = !this.showCharacters;
       },
@@ -375,6 +380,8 @@
       },
       playerReady: function(event) {
         self.videoPlayer = event.target;
+
+        self.videoPlayer.seekTo(this.bookmarks[this.matchId]['begin']);
       },
       initBookMarks: function() {
         this.bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || {};
@@ -525,6 +532,9 @@
     }
     .col-stocks {
         width: 50px;
+    }
+    .no-video {
+        opacity: 0.5;
     }
     .stock-loser {
         opacity: 0.5;
