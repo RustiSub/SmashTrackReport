@@ -6,11 +6,15 @@
   </div>
 </template>
 <script>
-  import LeaderBoard from './components/Leaderboard.vue'
+  import LeaderBoard from './components/Leaderboard.vue';
+  import BookmarkButton from './components/BookmarkButton.vue';
+  import TimeLine from './components/TimeLine.vue';
+
   export default {
     name: 'app',
     components: {
-      LeaderBoard
+      LeaderBoard,
+      BookmarkButton,
     }
   }
 </script>
