@@ -47,6 +47,15 @@
                 </time-line>
             </div>
         </modal>
+        <div id="twitchPlayerFeed" v-show="feedLive">
+            <h3>Feed</h3>
+            <twitch-player
+                    :channel="'teamsmacker'"
+                    v-on:offline="offline"
+                    ref="matchPlayer"
+            >
+            </twitch-player>
+        </div>
         <h3>Leaderboard</h3>
         <table class="table">
             <thead class="thead-dark">
@@ -106,6 +115,14 @@
                 <th>Stage</th>
             </tr>
             </thead>
+            <tr>
+                <td colspan="3">
+                    <span class="btn save-icon" @click="downloadBookmarks()"><font-awesome-icon icon="save"></font-awesome-icon></span>
+                    <input type="file" id="file-input" />
+                    <span class="btn open-icon" @click="openBookmarks()"><font-awesome-icon icon="folder-open"></font-awesome-icon></span>
+                    <span class="btn delete-icon" @click="clearBookmarks()"><font-awesome-icon icon="trash"></font-awesome-icon></span>
+                </td>
+            </tr>
             <template v-for="match in sortedMatchesByDate">
                 <tr>
                     <td style="vertical-align: middle">
@@ -274,6 +291,39 @@
       }
     },
     methods: {
+      clearBookmarks: function() {
+        localStorage.setItem('bookmarks_backup_' + moment().format('YYYY-MM-DDHH:m'), this.bookmarks);
+        localStorage.setItem('bookmarks', JSON.stringify({}));
+
+        this.initBookMarks();
+      },
+      openBookmarks: function() {
+        var self = this;
+        var file = document.getElementById('file-input').files[0];
+
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          localStorage.setItem('bookmarks_backup_' + moment().format('YYYY-MM-DDHH:m'), this.bookmarks);
+          localStorage.setItem('bookmarks', JSON.stringify(JSON.parse(e.target.result)));
+
+          self.initBookMarks();
+        };
+        reader.readAsText(file);
+      },
+      downloadBookmarks: function() {
+          let filename = 'smacker-bookmarks.json';
+          let text = JSON.stringify(this.bookmarks);
+          let  element = document.createElement('a');
+          element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+          element.setAttribute('download', filename);
+
+          element.style.display = 'none';
+          document.body.appendChild(element);
+
+          element.click();
+
+          document.body.removeChild(element);
+      },
       hasVideo: function(matchId) {
         let video = this.bookmarks[matchId] || false;
 
@@ -383,6 +433,9 @@
 
         self.videoPlayer.seekTo(this.bookmarks[this.matchId]['begin']);
       },
+      offline: function(event) {
+        this.feedLive = false;
+      },
       initBookMarks: function() {
         this.bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || {};
         localStorage.setItem('bookmarks', JSON.stringify(this.bookmarks));
@@ -467,6 +520,7 @@
         player: {},
         playerWidth: 0,
         bookmarks: {},
+        feedLive: false
       }
     },
     watch: {
@@ -540,6 +594,9 @@
     }
     .col-stocks {
         width: 50px;
+    }
+    .save-icon {
+
     }
     .no-video {
         opacity: 0.5;
