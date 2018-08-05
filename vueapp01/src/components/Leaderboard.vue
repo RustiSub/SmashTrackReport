@@ -424,6 +424,14 @@
           this.bookmarks[matchId][name][playerId][stockNumber] = {
             timestamp: timestamp
           };
+
+          if (this.bookmarks[matchId]['begin'] > timestamp) {
+            this.bookmarks[matchId]['begin'] = timestamp;
+          }
+
+          if (this.bookmarks[matchId]['end'] < timestamp) {
+            this.bookmarks[matchId]['end'] = timestamp;
+          }
         }
 
         localStorage.setItem('bookmarks', JSON.stringify(this.bookmarks));

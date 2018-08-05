@@ -79,7 +79,7 @@
         seconds = seconds - this.bookmarks[this.match.match.id]['begin'];
         var duration = moment.duration(seconds, 'seconds');
 
-        return  duration.format("h:mm:ss", {
+        return  duration.format("mm:ss", {
           trim: false
         });
       }
@@ -114,6 +114,6 @@
     .time-line-bookmark-time {
         position: absolute;
         top: 40px;
-        left: -7px;
+        left: -2px;
     }
 </style>
