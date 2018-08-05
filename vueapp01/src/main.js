@@ -5,7 +5,29 @@ import 'moment-duration-format'
 import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+import LoadScript from 'vue-plugin-load-script'
+import VModal from 'vue-js-modal'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faTrash } from '@fortawesome/free-solid-svg-icons'
+import { faFolderOpen } from '@fortawesome/free-solid-svg-icons'
+import { faSave } from '@fortawesome/free-solid-svg-icons'
+import { faEye } from '@fortawesome/free-solid-svg-icons'
+import { faHourglassStart } from '@fortawesome/free-solid-svg-icons'
+import { faHourglassEnd } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import VueYouTubeEmbed from 'vue-youtube-embed'
 
+library.add(faTrash);
+library.add(faFolderOpen);
+library.add(faSave);
+library.add(faEye);
+library.add(faHourglassStart);
+library.add(faHourglassEnd);
+Vue.component('font-awesome-icon', FontAwesomeIcon);
+
+Vue.use(VueYouTubeEmbed);
+Vue.use(VModal);
+Vue.use(LoadScript);
 Vue.use(BootstrapVue);
 Vue.config.productionTip = false;
 
