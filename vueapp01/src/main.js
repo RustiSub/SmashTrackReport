@@ -25,6 +25,7 @@ library.add(faHourglassStart);
 library.add(faHourglassEnd);
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 
+Vue.use(LoadScript);
 Vue.use(VueYouTubeEmbed);
 Vue.use(VModal);
 Vue.use(LoadScript);

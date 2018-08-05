@@ -47,14 +47,16 @@
                 </time-line>
             </div>
         </modal>
-        <div id="twitchPlayerFeed" v-show="feedLive">
+        <div id="twitchPlayerFeed">
             <h3>Feed</h3>
-            <twitch-player
-                    :channel="'teamsmacker'"
-                    v-on:offline="offline"
-                    ref="matchPlayer"
-            >
-            </twitch-player>
+            <div>
+                <twitch-player
+                        :channel="'teamsmacker'"
+                        v-on:offline="offline"
+                        ref="matchPlayer"
+                >
+                </twitch-player>
+            </div>
         </div>
         <h3>Leaderboard</h3>
         <table class="table">
@@ -168,7 +170,7 @@
 <script>
   import axios from 'axios';
   import moment from 'moment';
-  import VueTwitchPlayer from './TwitchPlayer.vue';
+  import VueTwitchPlayer from 'vue-twitch-player';
   import BookmarkButton from "./BookmarkButton.vue";
   import TimeLineBookmarkButton from "./TimeLineBookmarkButton.vue";
   import TimeLine from "./TimeLine.vue";
