@@ -5,7 +5,6 @@ import 'moment-duration-format'
 import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
-import LoadScript from 'vue-plugin-load-script'
 import VModal from 'vue-js-modal'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faTrash } from '@fortawesome/free-solid-svg-icons'
@@ -25,10 +24,8 @@ library.add(faHourglassStart);
 library.add(faHourglassEnd);
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 
-Vue.use(LoadScript);
 Vue.use(VueYouTubeEmbed);
 Vue.use(VModal);
-Vue.use(LoadScript);
 Vue.use(BootstrapVue);
 Vue.config.productionTip = false;
 
