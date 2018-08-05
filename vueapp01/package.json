@@ -1,7 +1,7 @@
 {
   "name": "smashtrackreport",
   "version": "1.0.0",
-  "description": "Consume SmashTrack API to report on data",
+  "description": "Consume SmashTrack API to report on data ",
   "author": "wpi.anaxis@gmail.com",
   "private": true,
   "scripts": {
