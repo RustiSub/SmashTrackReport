@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import App from './App'
 import axios from 'axios'
+import 'moment-duration-format'
 import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
