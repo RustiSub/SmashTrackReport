@@ -269,9 +269,7 @@
     components: {
       TimeLine,
       TimeLineBookmarkButton,
-      BookmarkButton,
-      'twitch-player': VueTwitchPlayer,
-
+      BookmarkButton
     },
     filters: {
       formatDate: function (value) {
