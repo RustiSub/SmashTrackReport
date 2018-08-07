@@ -24,6 +24,10 @@
             <font-awesome-icon icon="hourglass-end"></font-awesome-icon>
             <span class="time-line-bookmark-time">{{ formattedTime(bookmarks[match.match.id]['end']) }}</span>
         </span>
+
+        <span v-bind:style="timeLineCursor" class="time-line-cursor">
+            <font-awesome-icon icon="play"></font-awesome-icon>
+        </span>
     </div>
 </template>
 <script>
@@ -42,7 +46,22 @@
     },
     props: {
       match: Object,
-      bookmarks: Object
+      bookmarks: Object,
+      currentTime: Object
+    },
+    computed: {
+      timeLineCursor: function () {
+        let begin = this.bookmarks[this.match.match.id]['begin'];
+        let end = this.bookmarks[this.match.match.id]['end'];
+        let duration = end - begin;
+        let time = this.currentTime.time - begin;
+
+        let width = time * ((1000 - 88) / duration);
+
+        return {
+          'left': width + 'px',
+        };
+      },
     },
     methods: {
       bookmarksOverlap: function(mainBookmark) {
@@ -88,15 +107,21 @@
 </script>
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+    .time-line-cursor {
+        position: absolute;
+        top: 8px;
+        margin-left: 15px;
+    }
     .time-line-bookmark {
         position: absolute;
         opacity: 0.90;
+        top: 30px;
     }
     .time-line-begin {
-        left: 20px;
+        left: 0px;
     }
     .time-line-end {
-        right: 20px;
+        right: 0px;
     }
     .time-line {
         position: relative;

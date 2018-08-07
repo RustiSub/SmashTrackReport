@@ -1,11 +1,18 @@
 <template>
     <div class="leaderboard">
-        <modal name="modal-match-player" @before-open="beforeOpen" :width="1000" :height="720">
+        <modal name="modal-match-player" @before-open="beforeOpen" @before-close="beforeClose" :width="1000" :height="720">
             <div id="replayPlayerWindow">
                 <span class="font-weight-bold">VideoId: </span>
                 <input v-model="videoId" placeholder="Youtube Video Id">
                 <div class="replay-container">
-                    <youtube :video-id="videoId" :playerWidth="1000" :playerHeight="500" @ready="playerReady"></youtube>
+                    <youtube :video-id="videoId"
+                             :playerWidth="1000"
+                             :playerHeight="500"
+                             @ready="playerReady"
+                             @playing="startCursor"
+                             @paused="stopCursor"
+                             @ended="stopCursor"
+                    ></youtube>
                 </div>
                 <div class="time-line-bookmarks">
                     <div class="time-line-bookmark-control">
@@ -42,6 +49,7 @@
                 </div>
                 <time-line v-bind:match="playingMatch"
                            v-bind:bookmarks="bookmarks"
+                           v-bind:currentTime="videoCurrentTime"
                            v-on:time-line-bookmark-click="seekBookmark">
 
                 </time-line>
@@ -419,7 +427,16 @@
       playerReady: function(event) {
         self.videoPlayer = event.target;
 
+        self.videoPlayer.mute();
         self.videoPlayer.seekTo(this.bookmarks[this.matchId]['begin']);
+      },
+      stopCursor: function(event) {
+        clearInterval(this.videoTimerId);
+      },
+      startCursor: function(event){
+        this.videoTimerId = setInterval(function() {
+          this.videoCurrentTime.time = self.videoPlayer.getCurrentTime();
+        }.bind(this), 100);
       },
       offline: function(event) {
         this.feedLive = false;
@@ -488,6 +505,9 @@
       hide () {
         this.$modal.hide('modal-match-player');
       },
+      beforeClose(event) {
+        this.stopCursor(event);
+      },
       beforeOpen(event) {
         this.playingMatch = event.params.match;
 
@@ -508,7 +528,11 @@
         player: {},
         playerWidth: 0,
         bookmarks: {},
-        feedLive: false
+        feedLive: false,
+        videoTimerId: null,
+        videoCurrentTime: {
+          time: 0
+        }
       }
     },
     watch: {
