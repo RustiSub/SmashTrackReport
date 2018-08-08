@@ -1,33 +1,59 @@
 <template>
     <div class="time-line">
-        <span class="btn btn-light time-line-bookmark time-line-begin" v-on:click="clickTimeLineBookmark(bookmarks[match.match.id]['begin'])">
-            <font-awesome-icon icon="hourglass-start"></font-awesome-icon>
-            <span class="time-line-bookmark-time">{{ formattedTime(bookmarks[match.match.id]['begin']) }}</span>
-        </span>
+        <div class="time-line-controls">
+            <div class="time-line-control-buttons">
+                <span @click="pauseVideo">
+                    <font-awesome-icon icon="step-backward"></font-awesome-icon>
+                </span>
 
-        <template v-for="(bookmark, bookmarkIndex) in bookmarks[match.match.id]['player']">
-            <template v-for="(playerBookmark, key) in bookmark">
-                <time-line-bookmark-button
-                    :bookMark="playerBookmark"
-                    :begin="bookmarks[match.match.id]['begin']"
-                    :end="bookmarks[match.match.id]['end']"
-                    v-on:time-line-bookmark-click="clickTimeLineBookmark(playerBookmark['timestamp'])">
-                    <img v-bind:src=mapCharacterStockIcon(match.players[bookmarkIndex].character.name)
-                         v-bind:title="match.players[bookmarkIndex].character.name"
-                         v-bind:alt="match.players[bookmarkIndex].character.name" width="20" height="20"
-                    />
-                </time-line-bookmark-button>
-            </template>
-        </template>
+                <span @click="pauseVideo"
+                      class="time-line-control-cursor"
+                >
+                    <font-awesome-icon icon="play"></font-awesome-icon>
+                </span>
 
-        <span class="btn btn-light time-line-bookmark time-line-end" v-on:click="clickTimeLineBookmark(bookmarks[match.match.id]['end'])">
-            <font-awesome-icon icon="hourglass-end"></font-awesome-icon>
-            <span class="time-line-bookmark-time">{{ formattedTime(bookmarks[match.match.id]['end']) }}</span>
-        </span>
+                    <span @click="skipFrame">
+                    <font-awesome-icon icon="step-forward"></font-awesome-icon>
+                </span>
+            </div>
+        </div>
 
-        <span v-bind:style="timeLineCursor" class="time-line-cursor">
-            <font-awesome-icon icon="play"></font-awesome-icon>
-        </span>
+        <div>
+            <span class="btn btn-light time-line-bookmark time-line-begin" v-on:click="clickTimeLineBookmark(bookmarks[match.match.id]['begin'])">
+                <font-awesome-icon icon="hourglass-start"></font-awesome-icon>
+                <span class="time-line-bookmark-time">{{ formattedTime(bookmarks[match.match.id]['begin']) }}</span>
+            </span>
+
+                <template v-for="(bookmark, bookmarkIndex) in bookmarks[match.match.id]['player']">
+                    <template v-for="(playerBookmark, key) in bookmark">
+                        <time-line-bookmark-button
+                                :bookMark="playerBookmark"
+                                :begin="bookmarks[match.match.id]['begin']"
+                                :end="bookmarks[match.match.id]['end']"
+                                v-on:time-line-bookmark-click="clickTimeLineBookmark(playerBookmark['timestamp'])">
+                            <img v-bind:src=mapCharacterStockIcon(match.players[bookmarkIndex].character.name)
+                                 v-bind:title="match.players[bookmarkIndex].character.name"
+                                 v-bind:alt="match.players[bookmarkIndex].character.name" width="20" height="20"
+                            />
+                        </time-line-bookmark-button>
+                    </template>
+                </template>
+
+                <span class="btn btn-light time-line-bookmark time-line-end" v-on:click="clickTimeLineBookmark(bookmarks[match.match.id]['end'])">
+                <font-awesome-icon icon="hourglass-end"></font-awesome-icon>
+                <span class="time-line-bookmark-time">{{ formattedTime(bookmarks[match.match.id]['end']) }}</span>
+            </span>
+
+                <span v-bind:style="timeLineCursor"
+                      @mouseover="hoverCursor"
+                      @mouseout="hoverCursorOut"
+                      @click="pauseVideo"
+                      class="time-line-cursor"
+                >
+                <font-awesome-icon icon="play" v-if="cursorDisplay(!this.cursorHover)"></font-awesome-icon>
+                <font-awesome-icon icon="pause" v-if="cursorDisplay(this.cursorHover)"></font-awesome-icon>
+            </span>
+        </div>
     </div>
 </template>
 <script>
@@ -42,12 +68,14 @@
     },
     data: function () {
       return {
+        cursorHover: false
       }
     },
     props: {
       match: Object,
       bookmarks: Object,
-      currentTime: Object
+      currentTime: Object,
+      playing: Boolean
     },
     computed: {
       timeLineCursor: function () {
@@ -64,27 +92,24 @@
       },
     },
     methods: {
-      bookmarksOverlap: function(mainBookmark) {
-        let playerBookmarks = this.bookmarks[this.match.match.id]['player'];
-
-        for (let playerBookmarkIndex in playerBookmarks) {
-          if (playerBookmarks.hasOwnProperty(playerBookmarkIndex)) {
-            let playerBookmarks = playerBookmarks[playerBookmarkIndex];
-
-            console.log(playerBookmarks);
-          }
+      cursorDisplay: function(hover) {
+        if (this.playing) {
+          return hover;
+        } else {
+          return !hover;
         }
-
-        Array.from(this.bookmarks[this.match.match.id]).forEach(function (overlappingBookMark) {
-          console.log(overlappingBookMark);
-          if( mainBookmark !== overlappingBookMark) {
-            if( mainBookmark > overlappingBookMark) {
-              if( mainBookmark < overlappingBookMark + 1000) {
-                console.log(mainBookmark);
-              }
-            }
-          }
-        });
+      },
+      skipFrame: function(event) {
+        this.$emit('time-line-next-frame-click');
+      },
+      pauseVideo: function(event) {
+        this.$emit('time-line-cursor-click');
+      },
+      hoverCursor: function(event) {
+        this.cursorHover = true;
+      },
+      hoverCursorOut: function(event) {
+        this.cursorHover = false;
       },
       mapCharacterStockIcon: function (characterName) {
         return require("../assets/characters/" + characterName.toLowerCase().trim().replace(/\s/g, "").replace(".", "") + ".png");
@@ -140,5 +165,15 @@
         position: absolute;
         top: 40px;
         left: -2px;
+    }
+    .time-line-controls {
+        width: 100%;
+        margin: 0 auto;
+    }
+    .time-line-control-buttons {
+        display: table;
+        margin: 0 auto;
+    }
+    .time-line-control-cursor {
     }
 </style>

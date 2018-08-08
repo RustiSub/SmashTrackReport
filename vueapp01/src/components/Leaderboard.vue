@@ -50,7 +50,11 @@
                 <time-line v-bind:match="playingMatch"
                            v-bind:bookmarks="bookmarks"
                            v-bind:currentTime="videoCurrentTime"
-                           v-on:time-line-bookmark-click="seekBookmark">
+                           v-bind:playing="playing"
+                           v-on:time-line-bookmark-click="seekBookmark"
+                           v-on:time-line-cursor-click="toggleVideoPlay"
+                           v-on:time-line-next-frame-click="playNextFrame"
+                >
 
                 </time-line>
             </div>
@@ -432,8 +436,11 @@
       },
       stopCursor: function(event) {
         clearInterval(this.videoTimerId);
+        this.playing = false;
       },
       startCursor: function(event){
+        this.playing = true;
+
         this.videoTimerId = setInterval(function() {
           this.videoCurrentTime.time = self.videoPlayer.getCurrentTime();
         }.bind(this), 100);
@@ -458,6 +465,18 @@
         localStorage.setItem('bookmarks', JSON.stringify(this.bookmarks));
 
         return this.bookmarks;
+      },
+      playNextFrame: function() {
+        self.videoPlayer.pauseVideo();
+        self.videoPlayer.seekTo(self.videoPlayer.getCurrentTime() + 0.01);
+      },
+      toggleVideoPlay: function() {
+        if (self.videoPlayer.getPlayerState() === 1) {
+          self.videoPlayer.pauseVideo();
+        }
+        if (self.videoPlayer.getPlayerState() === 2) {
+          self.videoPlayer.playVideo();
+        }
       },
       seekBookmark: function(event) {
         self.videoPlayer.seekTo(event.timestamp);
@@ -510,6 +529,7 @@
       },
       beforeOpen(event) {
         this.playingMatch = event.params.match;
+        this.playing = false;
 
         this.initMatchBookMarks(this.playingMatch.match.id, this.playingMatch.players);
 
@@ -530,6 +550,7 @@
         bookmarks: {},
         feedLive: false,
         videoTimerId: null,
+        playing: false,
         videoCurrentTime: {
           time: 0
         }
