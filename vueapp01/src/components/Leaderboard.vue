@@ -6,8 +6,8 @@
                 <input v-model="videoId" placeholder="Youtube Video Id">
                 <div class="replay-container">
                     <youtube :video-id="videoId"
-                             :playerWidth="1000"
-                             :playerHeight="500"
+                             :playerWidth="100"
+                             :playerHeight="50"
                              @ready="playerReady"
                              @playing="startCursor"
                              @paused="stopCursor"

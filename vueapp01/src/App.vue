@@ -13,8 +13,7 @@
   export default {
     name: 'app',
     components: {
-      LeaderBoard,
-      BookmarkButton,
+      LeaderBoard
     }
   }
 </script>

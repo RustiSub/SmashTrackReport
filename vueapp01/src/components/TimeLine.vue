@@ -1,5 +1,8 @@
 <template>
     <div class="time-line">
+        <div class="time-line-damage-chart">
+            <damage-chart></damage-chart>
+        </div>
         <span class="btn btn-light time-line-bookmark time-line-begin" v-on:click="clickTimeLineBookmark(bookmarks[match.match.id]['begin'])">
             <font-awesome-icon icon="hourglass-start"></font-awesome-icon>
             <span class="time-line-bookmark-time">{{ formattedTime(bookmarks[match.match.id]['begin']) }}</span>
@@ -34,11 +37,13 @@
   import TimeLineBookmarkButton from './TimeLineBookmarkButton.vue';
   import moment from 'moment';
   import momentFormat from 'moment-duration-format';
+  import DamageChart from './DamageChart.js'
 
   export default {
     name: 'TimeLine',
     components: {
-      TimeLineBookmarkButton
+      TimeLineBookmarkButton,
+      DamageChart
     },
     data: function () {
       return {
