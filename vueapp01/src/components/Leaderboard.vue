@@ -561,8 +561,8 @@
       this.initBookMarks();
 
       self.$http.post('https://smashtrack.benn0.be/login', {
-        tag: 'WPIT',
-        password: 'WPIT'
+        tag: 'smackerboard',
+        password: '$2b$12$3v9P7U55Vr.ooknBPlaaMes7DFeJHSEKYiNEcxB1V7kccn9Im9XJ6'
       }, {
         headers: {
           'Content-type': 'application/json',
