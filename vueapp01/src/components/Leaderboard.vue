@@ -336,7 +336,7 @@
       },
       mapCharacterStockIcon: function (characterName) {
         try {
-          return require("../assets/characters/" + characterName.toLowerCase().trim().replace(/\s/g, "").replace(".", "") + ".png");
+          return require("../assets/characters/" + characterName.toLowerCase().trim().replace(/\s/g, "").replace(/\./g, "") + ".png");
         } catch (e) {
           return '';
         }
