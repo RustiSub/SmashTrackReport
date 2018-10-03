@@ -187,6 +187,7 @@
 
     Array.from(users).forEach(function (user) {
       user.games = 0;
+      user.gamesWithStockData = 0;
       user.wins = 0;
       user.losses = 0;
       user.winRatio = 0;
@@ -246,11 +247,13 @@
               user.games += 1;
               character.games += 1;
 
-              user.stocksLost += matchPlayedData.match.stocks - player.data.stocks;
-              character.stocksLost += matchPlayedData.match.stocks - player.data.stocks;
-            } else {
+              if (matchPlayedData.match.stocks && player.data.stocks) {
+                user.gamesWithStockData += 1;
+                user.stocksLost += matchPlayedData.match.stocks - player.data.stocks;
+                character.stocksLost += matchPlayedData.match.stocks - player.data.stocks;
+              }
+            } else if (matchPlayedData.match.stocks && player.data.stocks) {
               user.stocksTaken += matchPlayedData.match.stocks - player.data.stocks;
-
               matchPlayedData.stocksTaken += matchPlayedData.match.stocks - player.data.stocks;
             }
           }
@@ -263,8 +266,8 @@
         return;
       }
       user.winRatio = (user.wins / user.games).toFixed(3);
-      user.stocksTakenRatio = (user.stocksTaken / user.games).toFixed(3);
-      user.stocksLostRatio = (user.stocksLost / user.games).toFixed(3);
+      user.stocksTakenRatio = (user.stocksTaken / user.gamesWithStockData).toFixed(3);
+      user.stocksLostRatio = (user.stocksLost / user.gamesWithStockData).toFixed(3);
     });
 
     return users;
